@@ -1,7 +1,9 @@
 # Team5 Lab1-Q2 Readme
 
-## Purpose
+## Purpose and Introduction
 Write a UDP client program for DAYTIME service.
+
+In this question, we just send the UDP request from client to the server we run by ourselves.  We don't exactly follow the Daytime Protocol, what we do is simply send the message and receive the daytime message that we got from our OS.
 
 ## Files
 This folder contains four files
@@ -33,6 +35,6 @@ Bind successful, listen to port 5678
 ```
 $ ./udp_client  # terminal 2
 UDP socket created
-Sent reqeust to server
+Sent request to server
 Receive DAYTIME from server: "Mon Mar  6 01:23:45 2018"
 ```

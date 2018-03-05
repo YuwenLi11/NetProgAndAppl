@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
         printf("Sento failed\n");
         return 1;
     }
-    printf("Sent reqeust to server\n");
+    printf("Sent request to server\n");
 
     // Receive response from server
     char rsp[100];
