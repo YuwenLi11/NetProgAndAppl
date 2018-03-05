@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     }
     printf("UDP socket created\n");
 
-    struct sockaddr_in server;
+    struct sockaddr_in server, client;
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY; // enable any ip_addr
     server.sin_port = htons(UDP_DAYTIME_PORT);
@@ -29,12 +29,22 @@ int main(int argc, char *argv[]) {
 
     // Receive message
     char msg[100];
-    if (recvfrom(sd, msg, sizeof(msg) - 1, 0, NULL, 0) < 0) {
+    socklen_t client_len = sizeof(client);
+    if (recvfrom(sd, msg, sizeof(msg), 0,
+        (struct sockaddr *)&client, &client_len) < 0) {
         printf("Recvfrom failed\n");
         return 1;
     }
     printf("Recvfrom successful, message from client is \"%s\"\n", msg);
 
+    // Send message to client
+    char rsp[100] = "ServerMsg";
+    if (sendto(sd, rsp, sizeof(rsp), 0,
+        (struct sockaddr *)&client, client_len) < 0) {
+        printf("Sento failed\n");
+        return 1;
+    }
+    printf("Sent message \"%s\" to client\n", rsp);
 
     return 0;
 }

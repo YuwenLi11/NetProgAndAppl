@@ -34,5 +34,13 @@ int main(int argc, char *argv[]) {
     }
     printf("Sent message %s to server\n", argv[1]);
 
+    // Receive response from server
+    char rsp[100];
+    if (recvfrom(sd, rsp, sizeof(rsp) - 1, 0, NULL, 0) < 0) {
+        printf("Recvfrom failed\n");
+        return 1;
+    }
+    printf("Receive response from server: \"%s\"\n", rsp);
+
     return 0;
 }
