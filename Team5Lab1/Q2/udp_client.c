@@ -3,7 +3,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define UDP_DAYTIME_PORT 5678 // Default should be 12, but reserved by OS
+#define UDP_DAYTIME_PORT 5678 // Default should be 13, but reserved by OS
 
 int main(int argc, char *argv[]) {
     // Create socket
