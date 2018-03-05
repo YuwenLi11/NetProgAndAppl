@@ -3,7 +3,7 @@
 ## Purpose and Introduction
 Write a UDP client program for DAYTIME service.
 
-In this question, we just send the UDP request from client to the server we run by ourselves.  We don't exactly follow the Daytime Protocol, what we do is simply send the message and receive the daytime message that we got from our OS.
+In this question, we just send the UDP request from client to the server we run by ourselves.  We don't exactly follow the Daytime Protocol, what we do is simply send the message and receive the daytime message that we get from our OS.
 
 ## Files
 This folder contains four files
@@ -15,11 +15,11 @@ This folder contains four files
     * For test, this file enable client to request DAYTIME.
 
 ## Compile
-In command line, key in `$ make`.  Two executable file `udp_server` and `udp_client` will be compiled and generated.
-Use `$ make clean` to remove generated files
+In command line, key in `make`.  Two executable file `udp_server` and `udp_client` will be compiled and generated.
+Use `make clean` to remove generated files
 
 ## Execute
-First, type `./udp_server` to run the udp server in terminal 1.
+First, type `./udp_server` to run the UDP server in terminal 1.
 Second, type `./udp_client` to run the client in terminal 2.  Here the client send the UDP packet to the server, and the server responds DAYTIME to the client.
 
 ## Test case
