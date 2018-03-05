@@ -1,14 +1,10 @@
-CC = g++
-CFLAGS = -std=c++14
+CC = gcc
+CFLAGS = -Wall
 TARGET = udp_client
 
-.SUFFIX: .cpp
+.SUFFIXS: .c
 
-all: ${TARGET}
-
-${TARGET}: udp_client.cpp
-	${CC} udp_client.cpp ${CFLAGS} -o $@
-
+udp_client: udp_client.c
+	${CC} $< ${CFLAGS} -o $@
 clean:
-	@echo "rm *.o ${TARGET}"
-	@rm *.o ${TARGET} 2>/dev/null || true # suppress error messages
+	@rm -rf ${TARGET}
