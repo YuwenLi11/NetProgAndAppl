@@ -1,13 +1,15 @@
 CC = gcc
 CFLAGS = -Wall
 TARGET_1 = udp_client
+RESOURCE_1 = udp_client.c
 TARGET_2 = udp_server
+RESOURCE_2 = udp_server.c
 
-all: udp_client udp_server
+all: ${TARGET_1} ${TARGET_2}
 
-udp_client: udp_client.c
+${TARGET_1}: ${RESOURCE_1}
 	${CC} $< ${CFLAGS} -o $@
-udp_server: udp_server.c
+${TARGET_2}: ${RESOURCE_2}
 	${CC} $< ${CFLAGS} -o $@
 clean:
-	@rm -rf udp_client udp_server
+	@rm -rf ${TARGET_1} ${TARGET_2}
