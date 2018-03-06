@@ -63,27 +63,25 @@ int main(){
     switch (valid) {
 		//case 0 the input is appropriate
     	case 0: {
-			int result1 = sqrt(num);
-			char result[1000000];
-			sprintf(result, "%d", result1);
-			write(clnt_sock, result, sizeof(result));
-			break;
-		}
+		int result1 = sqrt(num);
+		char result[1000000];
+		sprintf(result, "%d", result1);
+		write(clnt_sock, result, sizeof(result));
+		break;
+	}
     	//case 1 the input is not a number
-		case 1: {
-			char str2[] = "please input a number";
-			write(clnt_sock, str2, sizeof(str2));
-			break;
-		}
-		//case 2,3 the input is not bigger than zero
-		case 2:
-		case 3:
-		{
-			char str3[] = "please input a number bigger than zero";
-			write(clnt_sock, str3, sizeof(str3));
-			break;
-		}
-
+	case 1: {
+		char str2[] = "please input a number";
+		write(clnt_sock, str2, sizeof(str2));
+		break;
+	}
+	//case 2,3 the input is not bigger than zero
+	case 2:
+	case 3:	{
+		char str3[] = "please input a number bigger than zero";
+		write(clnt_sock, str3, sizeof(str3));
+		break;
+	}
     }
 
     //close socket
