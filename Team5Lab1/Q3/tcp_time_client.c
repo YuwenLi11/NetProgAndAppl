@@ -65,10 +65,13 @@ time_t request_time(char *time_server_ip) {
 
 int main(int argc, char *argv[]) {
     time_t time1 = request_time("129.6.15.28");
+    time_t time2 = request_time("129.6.15.29");
 
-    char time_str1[100];
+    char time_str1[100], time_str2[100];
     time_to_string(time_str1, time1);
-    printf("Receive from server: %s\n", time_str1);
+    time_to_string(time_str2, time2);
+    printf("Receive from server 1: %s\n", time_str1);
+    printf("Receive from server 2: %s\n", time_str2);
 
     return 0;
 }
