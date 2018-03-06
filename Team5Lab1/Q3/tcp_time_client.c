@@ -64,14 +64,28 @@ time_t request_time(char *time_server_ip) {
 }
 
 int main(int argc, char *argv[]) {
-    time_t time1 = request_time("129.6.15.28");
-    time_t time2 = request_time("129.6.15.29");
+    // Check input should contain two ip address
+    if (argc != 3) {
+        printf("Two time server IP Addresses are required\n");
+        return 1;
+    }
 
+    // Send requests to two TIME servers
+    printf("Send time request to %s...\n", argv[1]);
+    time_t time1 = request_time(argv[1]);
+    printf("Send time request to %s...\n", argv[2]);
+    time_t time2 = request_time(argv[2]);
+
+    // Transfer time_t to string
     char time_str1[100], time_str2[100];
     time_to_string(time_str1, time1);
     time_to_string(time_str2, time2);
-    printf("Receive from server 1: %s\n", time_str1);
-    printf("Receive from server 2: %s\n", time_str2);
+    printf("Receive from server %s: %s\n", argv[1], time_str1);
+    printf("Receive from server %s: %s\n", argv[2], time_str2);
+
+    // Calculate time difference
+    time_t diff = time2 > time1 ? time2 - time1 : time1 - time2;
+    printf("The difference between two servers are %d seconds\n", (int)diff);
 
     return 0;
 }
