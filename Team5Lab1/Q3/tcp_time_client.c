@@ -7,11 +7,11 @@
 #include <unistd.h>
 
 #define TCP_TIME_PORT 37
-#define TRANSFER_OFFSET 2208988800U
+#define TRANSFORM_OFFSET 2208988800U
 
-// transfer raw_time (32 bits from server) to a time_t value
+// transform raw_time (32 bits from server) to a time_t value
 time_t trans_time_format(unsigned int raw_time) {
-    return ntohl(raw_time) - TRANSFER_OFFSET;
+    return ntohl(raw_time) - TRANSFORM_OFFSET;
 }
 
 // save cur_time as a string into time_str
@@ -55,7 +55,7 @@ time_t request_time(char *time_server_ip) {
         exit(1);
     }
 
-    // transfer time format
+    // transform time format
     time_t trans_time = trans_time_format(time_buf);
 
     close(sd);
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
     printf("Send time request to %s...\n", argv[2]);
     time_t time2 = request_time(argv[2]);
 
-    // Transfer time_t to string
+    // Transform time_t to string
     char time_str1[100], time_str2[100];
     time_to_string(time_str1, time1);
     time_to_string(time_str2, time2);
