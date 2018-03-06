@@ -8,6 +8,16 @@
 #define TCP_TIME_PORT 37
 #define TRANSFER_OFFSET 2208988800U
 
+// transfer raw_time (32 bits from server) to a time_t value
+time_t trans_time_format(unsigned int raw_time) {
+    return ntohl(raw_time) - TRANSFER_OFFSET;
+}
+
+void time_to_string(char *time_str, time_t cur_time) {
+    strcpy(time_str, ctime(&cur_time));
+    time_str[strlen(time_str) - 1] = '\0'; // remove \n
+}
+
 int main(int argc, char *argv[]) {
     // Create socket
     int sd = socket(AF_INET, SOCK_STREAM, 0); // SOCK_STREAM for TCP
@@ -43,10 +53,9 @@ int main(int argc, char *argv[]) {
     }
 
     // transfer time format
-    time_t trans_time = ntohl(time_buf) - TRANSFER_OFFSET;
+    time_t trans_time = trans_time_format(time_buf);
     char time_str[100];
-    strcpy(time_str, ctime(&trans_time));
-    time_str[strlen(time_str) - 1] = '\0'; // remove \n
+    time_to_string(time_str, trans_time);
 
     printf("Receive from server: %s\n", time_str);
 
