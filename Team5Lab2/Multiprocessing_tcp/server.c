@@ -89,7 +89,7 @@ int main() {
         return -1;
     }
 
-    //listen to the port, create one thread per request
+    //listen to the port, create one process per request
     while(1)
     {
         clen=sizeof(c_addr);
