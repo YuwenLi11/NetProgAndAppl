@@ -46,6 +46,6 @@ $ ./client 900bytes.txt   # client's terminal
 
 test case2: (Pre_allocated server)
 ```
-./server 5     # server's terminal
-./client 900bytes.txt   # client's terminal
+$./server 5     # server's terminal
+$./client 900bytes.txt   # client's terminal
 ```
