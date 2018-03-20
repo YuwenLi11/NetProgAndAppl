@@ -26,16 +26,16 @@ This folder contains four files
 ## Compile
 Please make sure that the server source file and client source file are in the same directory
 
-In command line, key in `make`.  Two executable file `server` and `client` will be compiled and generated in the different folder: 'client_folder', 'server_folder'. 
+In command line, key in `make`.  Two executable file `server` and `client` will be compiled and generated in the different folder: `client_folder`, `server_folder`. 
 
-Please move the test data files into 'server_folder'
+Please move the test data(`900bytes.txt`, `1800bytes.txt`) files into `server_folder`
 
 Use `make clean` to remove generated files
 
 ## Execute
 First, type `./server` to run the TCP server in terminal 1.
-(For Pre-allocated server type './server' plus an Integer to indicate the number of chilren to pre_allocated)
-Second, type `./client ` plus 'file name' to run the client in terminal 2.
+(For Pre-allocated server type `./server` plus `an Integer` to indicate the number of chilren to pre_allocated)
+Second, type `./client ` plus `file name` to run the client in terminal 2.
 
 ## Test case and expected result
 test case1: (none Pre_allocated server)
