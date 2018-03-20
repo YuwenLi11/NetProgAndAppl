@@ -11,71 +11,65 @@
 
 struct sockaddr_in c_addr;
 char fname[100];
-
+// send file to client function
 void *SendFileToClient(void *arg)
 {
-      int connfd = *(int*)arg;
-      printf("Connection accepted and id: %d\n",connfd);
-      printf("Connected to Clent: %s:%d\n",inet_ntoa(c_addr.sin_addr),ntohs(c_addr.sin_port));
-      read(connfd, fname,256);
-      printf("Message form client: %s", fname);
+	 //information from the client
+     int connfd = *(int*)arg;
+     printf("Connection accepted and id: %d\n",connfd);
+     printf("Connected to Clent: %s:%d\n",inet_ntoa(c_addr.sin_addr),ntohs(c_addr.sin_port));
 
-        FILE *fp = fopen(fname,"rb");
-        if(fp==NULL)
-        {
-            printf("File opern error");
-            return 1;
-        }
+     //file which requested by client
+     read(connfd, fname,256);
+     printf("Message form client: %s\n", fname);
 
-        /* Read data from file and send it */
-        while(1)
-        {
-            /* First read file in chunks of 256 bytes */
-            unsigned char buff[1024]={0};
-            int nread = fread(buff,1,1024,fp);
+     FILE *fp = fopen(fname,"rb");
+     if (fp==NULL) {
+    	 printf("There is no file named: %s\n", fname);
+     } else {
+        //Read data from file and send it
+    	 while(1) {
+    		 unsigned char buff[1024]={0};
+    		 int nread = fread(buff,1,1024,fp);
 
-            /* If read was success, send data. */
+        //If read was success, send data
 
-            if(nread > 0)
-            {
+            if(nread > 0) {
                 write(connfd, buff, nread);
             }
-            if (nread < 1024)
-            {
-                if (feof(fp))
-		{
-                    printf("End of file\n");
-		    printf("File transfer completed for id: %d\n",connfd);
-		}
-                if (ferror(fp))
+            if (nread < 1024) {
+                if (feof(fp)) {
+                	printf("End of file\n");
+                	printf("File transfer completed for id: %d\n",connfd);
+                }
+                if (ferror(fp)) {
                     printf("Error reading\n");
+                }
                 break;
             }
         }
-printf("Closing Connection for id: %d\n",connfd);
-close(connfd);
-shutdown(connfd,SHUT_WR);
-sleep(2);
+       }
+     //close the thread
+     printf("Closing Connection for id: %d\n",connfd);
+     close(connfd);
+     shutdown(connfd,SHUT_WR);
+     sleep(2);
 }
 
-int main()
-{
+int main() {
     int connfd = 0,err;
     pthread_t tid;
     struct sockaddr_in serv_addr;
     int listenfd = 0,ret;
-    char sendBuff[1025];
-    int numrv;
     size_t clen=0;
 
+    //server's information
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     if(listenfd<0)
 	{
 	  printf("Error in socket creation\n");
 	  exit(2);
 	}
-
-    printf("Socket retrieve success\n");
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -94,10 +88,11 @@ int main()
         return -1;
     }
 
+    //listen to the port, create one thread per request
+
     while(1)
-    {
+    {	printf("Waiting\n");
         clen=sizeof(c_addr);
-        printf("Waiting...\n");
         connfd = accept(listenfd, (struct sockaddr*)&c_addr,&clen);
         if(connfd<0)
         {

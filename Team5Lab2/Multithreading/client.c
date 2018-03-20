@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 int main(int argc, char *argv[])
-{
+{	if (argc == 2) {
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
     //sent the request to the assigned host
     struct sockaddr_in serv_addr;
@@ -21,40 +21,46 @@ int main(int argc, char *argv[])
     serv_addr.sin_port = htons(2222);  //port is 2222
     connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
 
+    //send the name of the file to the server
     char fname[50];
     strcpy(fname,argv[1]);
     int bytesReceived = 0;
-    char recvBuff[1000000];
-    printf("file name: %s\n", fname);
+    char recvBuff[1024];
+    printf("requested file name: %s\n", fname);
     write(sock, fname, 50);
+    bytesReceived = read(sock, recvBuff, 1024);
 
-   	 /* Create file where data will be stored */
-    FILE *fp;
-
-	printf("Receiving file...");
-
-	fp = fopen(fname, "ab");
-    	if(NULL == fp)
-    	{
-       	 printf("Error opening file");
-         return 1;
-    	}
-
-
-    /* Receive data in chunks of 256 bytes */
-    while((bytesReceived = read(sock, recvBuff, sizeof(recvBuff)-1)) > 0)
-    {
-	fflush(stdout);
-        // recvBuff[n] = 0;
-        fwrite(recvBuff, 1,bytesReceived,fp);
-        // printf("%s \n", recvBuff);
-    }
-
-    if(bytesReceived < 0)
-    {
+    // no file matched
+    if (bytesReceived == 0) {
+        printf("There is no file in server named: %s\n", fname);
+    } else if (bytesReceived < 0) {
         printf("\n Read Error \n");
-    }
+    } else {
+    		//create a file for receiving
+        	FILE *fp;
+        	printf("Receiving file...\n");
+        	fp = fopen(fname, "ab");
+           		if(NULL == fp) {
+           			printf("Error opening file");
+           			return 1;
+           	}
 
-    printf("\nFile OK....Completed\n");
+           	// in case the file is less than 1 bytes
+           	printf("writing\n");
+           	fflush(stdout);
+           	fwrite(recvBuff, 1,bytesReceived,fp);
+           	//keep writing
+           	while((bytesReceived = read(sock, recvBuff, 1024)) > 0) {
+           		printf("writing\n");
+           		fflush(stdout);
+           		fwrite(recvBuff, 1,bytesReceived,fp);
+           	}
+            fclose(fp);
+            //check the file
+           	printf("File received completely!");
+    	}
+	} else {
+        	printf("Please enter the file name\n");
+	}
     return 0;
 }
