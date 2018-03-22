@@ -26,6 +26,8 @@ This folder contains four files
 ## Compile
 Please make sure that the server source file and client source file are in the same directory
 
+Please rename the `server_xxx_tcp.c` into `server.c`
+
 In command line, key in `make`.  Two executable file `server` and `client` will be compiled and generated in the different folder: `client_folder`, `server_folder`. 
 
 Please move the test data(`900bytes.txt`, `1800bytes.txt`) files into `server_folder`
