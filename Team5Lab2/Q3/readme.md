@@ -9,15 +9,25 @@ This folder contains four files
 * Makefile
 * readme.md
 * client_tcp.c
+* client_udp.c
 
 ## Compile
 For Connection-oriented client
 please see Q1 readme
 
+For Connection-less client
+please see Q2 readme
+
 ## Execute
 For Connection-oriented client
 Please see Q1 readme
 
+For Connection-less client
+please see Q2 readme
+
 ## Test case and expected result
 For Connection-oriented client
 Please see Q1 readme
+
+For Connection-less client
+please see Q2 readme
