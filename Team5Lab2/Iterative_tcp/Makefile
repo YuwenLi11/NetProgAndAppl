@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall
 
 all: client server
-	mkdir client_folder server_folder
+	mkdir -p client_folder server_folder
 	mv client client_folder
 	mv server server_folder
 	cp 1800bytes.txt 900bytes.txt server_folder
