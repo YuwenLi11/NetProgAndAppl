@@ -8,8 +8,22 @@
 #include <string.h>
 #include <sys/types.h>
 #include <pthread.h>
+#include <signal.h>
 
-int main() {
+int main(int argc, char *argv[]) {
+
+    int num = 0;
+
+    if (argc == 2)  {
+        //get the number of pre-allocated children
+        char proc[50];
+        strcpy(proc,argv[1]);
+        num = atoi(proc);
+    } else {
+        printf("Please enter one number\n");
+        return -1;
+    }
+
     struct sockaddr_in serv_addr;
     int listenfd = 0,ret;
 
@@ -32,41 +46,48 @@ int main() {
       exit(2);
     }
 
-    while(1)
-    {
-        struct sockaddr_in clnt_addr;
-        socklen_t clen=sizeof(clnt_addr);
-        char fname[256];
-        printf("Waiting...\n");
+    struct sockaddr_in clnt_addr;
+    socklen_t clen=sizeof(clnt_addr);
+    char fname[256];
+    printf("Waiting...\n");
 
-        recvfrom(listenfd, fname, 256, 0,
-            (struct sockaddr *)&clnt_addr, &clen);
-
-        int pid = fork();
+    int pid;
+    for (int i = 0; i < num; i++) {
+        pid = fork();
 
         if (pid == 0) { // child
-            printf("Child %d is forked\n", getpid());
+            while (1) {
+                printf("child %d is running\n", getpid());
 
-            FILE *fp = fopen(fname,"rb");
-            if (fp==NULL) {
-           	    printf("There is no file named: %s\n", fname);
-                char zero_buff[1] = {0};
-                sendto(listenfd, zero_buff, 1, 0,
-                           (struct sockaddr *)&clnt_addr, clen);
-            } else {
-               //Read data from file and send it
-           		 unsigned char buff[2048]={0};
-           		 int nread = fread(buff,1,2048,fp);
+                recvfrom(listenfd, fname, 256, 0, (struct sockaddr *)&clnt_addr, &clen);
+                FILE *fp = fopen(fname,"rb");
+                if (fp==NULL) {
+                    printf("There is no file named: %s\n", fname);
+                    char zero_buff[1] = {0};
+                    sendto(listenfd, zero_buff, 0, 0,
+                               (struct sockaddr *)&clnt_addr, clen);
+                } else {
+                   //Read data from file and send it
+                     unsigned char buff[2048]={0};
+                     int nread = fread(buff,1,2048,fp);
 
-                 sendto(listenfd, buff, nread, 0,
-                            (struct sockaddr *)&clnt_addr, clen
-                 printf("File sent!\n");
+                     sendto(listenfd, buff, nread, 0,
+                                (struct sockaddr *)&clnt_addr, clen);
+                     printf("File sent!\n");
+                }
             }
-
-
         }
-
-
     }
+
+    // for killing zombies
+    while (1) {
+        int status;
+        pid_t wait_pid = waitpid(-1, &status, 0);
+        if (wait_pid <= 0) {
+            break;
+        }
+        printf("child_pid: %d dead\n", wait_pid);
+    }
+
     return 0;
 }
