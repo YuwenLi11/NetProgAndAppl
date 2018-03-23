@@ -59,9 +59,10 @@ int main() {
            		 int nread = fread(buff,1,2048,fp);
 
                  sendto(listenfd, buff, nread, 0,
-                            (struct sockaddr *)&clnt_addr, clen);
-               }
-               printf("File sent!\n");
+                            (struct sockaddr *)&clnt_addr, clen
+                 printf("File sent!\n");
+            }
+
 
         }
 
