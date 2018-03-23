@@ -9,63 +9,12 @@
 #include <sys/types.h>
 #include <pthread.h>
 
-struct sockaddr_in c_addr;
-char fname[100];
-// send file to client function
-
-int SendFileToClient(int fd)
-{
-	 //information from the client
-     int connfd = fd;
-     printf("Connection accepted and id: %d\n",connfd);
-     printf("Connected to Client: %s:%d\n",inet_ntoa(c_addr.sin_addr),ntohs(c_addr.sin_port));
-
-     //file which requested by client
-     read(connfd, fname,256);
-     printf("Message form client: %s\n", fname);
-
-     FILE *fp = fopen(fname,"rb");
-     if (fp==NULL) {
-    	 printf("There is no file named: %s\n", fname);
-     } else {
-        //Read data from file and send it
-    	 while(1) {
-    		 unsigned char buff[1024]={0};
-    		 int nread = fread(buff,1,1024,fp);
-
-        //If read was success, send data
-
-            if(nread > 0) {
-                write(connfd, buff, nread);
-            }
-            if (nread < 1024) {
-                if (feof(fp)) {
-                	printf("End of file\n");
-                	printf("File transfer completed for id: %d\n",connfd);
-                }
-                if (ferror(fp)) {
-                    printf("Error reading\n");
-                }
-                break;
-            }
-        }
-       }
-     //close the thread
-     printf("Closing Connection for id: %d\n",connfd);
-     close(connfd);
-     shutdown(connfd,SHUT_WR);
-     sleep(2);
-     return 0;
-}
-
 int main() {
-    int connfd = 0;
     struct sockaddr_in serv_addr;
     int listenfd = 0,ret;
-    size_t clen=0;
 
     //server's information
-    listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    listenfd = socket(AF_INET, SOCK_DGRAM, 0);
     if(listenfd<0)
 	{
 	  printf("Error in socket creation\n");
@@ -83,39 +32,40 @@ int main() {
       exit(2);
     }
 
-    if(listen(listenfd, 10) == -1)
-    {
-        printf("Failed to listen\n");
-        return -1;
-    }
-
-    //listen to the port, create one process per request
     while(1)
     {
-        clen=sizeof(c_addr);
+        struct sockaddr_in clnt_addr;
+        socklen_t clen=sizeof(clnt_addr);
+        char fname[256];
         printf("Waiting...\n");
-        connfd = accept(listenfd, (struct sockaddr*)&c_addr,&clen);
-        if(connfd<0)
-        {
-        	printf("Error in accept\n");
-        	continue;
-        }
-        switch (fork()) {
-        	case 0:{
-        		/* child */
-        		(void)close(listenfd);
-        		exit(SendFileToClient(connfd));
-        	}
-        	default:{
-        		/* parent */
-        		(void)close(connfd);
-        		break;
-        	}
-        	case -1:{
-        		printf("Error to fork");
-        	}
+
+        recvfrom(listenfd, fname, 256, 0,
+            (struct sockaddr *)&clnt_addr, &clen);
+
+        int pid = fork();
+
+        if (pid == 0) { // child
+            printf("Child %d is forked\n", getpid());
+
+            FILE *fp = fopen(fname,"rb");
+            if (fp==NULL) {
+           	    printf("There is no file named: %s\n", fname);
+                char zero_buff[1] = {0};
+                sendto(listenfd, zero_buff, 1, 0,
+                           (struct sockaddr *)&clnt_addr, clen);
+            } else {
+               //Read data from file and send it
+           		 unsigned char buff[2048]={0};
+           		 int nread = fread(buff,1,2048,fp);
+
+                 sendto(listenfd, buff, nread, 0,
+                            (struct sockaddr *)&clnt_addr, clen);
+               }
+               printf("File sent!\n");
 
         }
+
+
     }
     return 0;
 }
