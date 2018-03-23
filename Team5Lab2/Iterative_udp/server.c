@@ -34,16 +34,19 @@ int main(){
         FILE *fp = fopen(fname,"rb");
         if (fp==NULL) {
        	 printf("There is no file named: %s\n", fname);
+         char zero_buff[1] = {0};
+         sendto(serv_sock, zero_buff, 0, 0,
+          (struct sockaddr *)&clnt_addr, clnt_addr_size);
         } else {
            //Read data from file and send it
        	 while(1) {
-       		 unsigned char buff[1024]={0};
-       		 int nread = fread(buff,1,1024,fp);
+       		 unsigned char buff[2048]={0};
+       		 int nread = fread(buff,1,2048,fp);
 
            //If read was success, send data
 
                if(nread > 0) {
-                   sendto(serv_sock, buff, sizeof(buff), 0,
+                   sendto(serv_sock, buff, nread, 0,
                     (struct sockaddr *)&clnt_addr, clnt_addr_size);
                }
                if (nread < 1024) {
