@@ -13,4 +13,3 @@ server: server.c
 	${CC} $< ${CFLAGS} -o $@
 clean:
 	@rm -rf client_folder server_folder
-w
