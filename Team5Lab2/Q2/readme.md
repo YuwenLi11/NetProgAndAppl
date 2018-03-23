@@ -1,7 +1,7 @@
-# Team5 Lab2-Q1 Readme
+# Team5 Lab2-Q2 Readme
 
 ## Purpose and Introduction
-This program include the sources of the following Connection-oriented file servers
+This program include the sources of the following Connectionless file servers
 * Iterative server
 * Concurrent Multiprocessing server with one process per request
 * Concurrent Multithreading server with one thread per request
@@ -13,17 +13,18 @@ The client passes an file name to the server as a command line argument.  The se
 
 ## Files
 This folder contains five folders and server files
-* Iterative_tcp
-* MultiProcessing_tcp
-* MultiThreading_tcp
-* PreForked_tcp
-* PreThreaded_tcp
+* Iterative_upd
+* MultiProcessing_upd
+* MultiThreading_upd
+* PreForked_upd
+* PreThreaded_upd
 (Each folder has own makefile to make `server` and `client` folder)
 
 * readme.md
 * 1800bytes.txt
 * 900bytes.txt
 
+## Compile
 ## Compile
 In each folder, type `make`, it generates two folder `server` and `client`.
 Use `make clean` to remove generated files
