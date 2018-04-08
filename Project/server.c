@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>         // string manipulation
@@ -28,7 +29,6 @@ int start_socket(int port) {
         printf("Couldn't create socket\n");
         exit(-1);
     }
-    printf("TCP socket created\n");
 
     // Set server configuration
     struct sockaddr_in server;
@@ -41,7 +41,13 @@ int start_socket(int port) {
         printf("Bind failed\n");
         exit(-1);
     }
-    printf("Bind successful, listen to port %d\n", port);
+
+    // Listen
+    if (listen(sd, BACKLOG) < 0) {
+        printf("Listen failed\n");
+        exit(-1);
+    }
+    printf("HTTP Server running on port %d\n", port);
 
     return sd;
 }
@@ -130,13 +136,6 @@ int get_request_url(int client_sd, char* client_ip, char* url) {
 
 int main() {
     int sd = start_socket(5678);
-
-    // Listen
-    if (listen(sd, BACKLOG) < 0) {
-        printf("Listen failed\n");
-        return -1;
-    }
-    printf("Listen successful\n");
 
     // Accept
     // Define client variables
