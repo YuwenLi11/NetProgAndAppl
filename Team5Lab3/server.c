@@ -7,7 +7,9 @@
 
 #define BACKLOG 10 // queue length
 #define MAX_HEADER_SIZE 1024
+#define MAX_URL_SIZE 1024
 
+#define UNKNOWN_REQUEST_ID 1000
 #define GET_REQUEST_ID 1001
 #define POST_REQUEST_ID 1002
 
@@ -47,7 +49,7 @@ int start_socket(int port) {
 /************************************************************
  * Function: compare_str
  *   Compare two string with different start position by given length
- *   EX - compare("abc", 1 "bcd", 0, 2) return 0, since "bc" equals to "bc"
+ *   EX - compare_str("abc", 1, "bcd", 0, 2) return 0, since "bc" equals to "bc"
  * Parameters:
  *   str1, str2 - two strings
  *   start1, start2 - start position of the string
@@ -57,7 +59,8 @@ int start_socket(int port) {
  *   1 - two string are not the same, with the given parameters
  ************************************************************/
 int compare_str(char *str1, int start1, char *str2, int start2, int len) {
-    if (len > strlen(str1) || len > strlen(str2)) return 1; // corner case
+    // check corner case
+    if (start1 + len > strlen(str1) || start2 + len > strlen(str2)) return 1;
 
     int cnt = 0;
     while (start1 < strlen(str1) && start2 < strlen(str2) && cnt < len) {
@@ -69,7 +72,29 @@ int compare_str(char *str1, int start1, char *str2, int start2, int len) {
     return 0; // the same
 }
 
-void get_request_url(int client_sd, char* client_header, char* client_ip) {
+/************************************************************
+ * Function: get_str_until_space
+ *   Get substr of src from given position until the first space and put in dst
+ *   EX - get_str_until_space("abc def", 0, dst) return 3, dst will be "abc"
+ * Parameters:
+ *   src - original string
+ *   src_start - the start position (including) of src
+ *   dst - the buffer that the substring will be put into
+ * Returns:
+ *   the position of next space or the length of src (it traverses to the end)
+ ************************************************************/
+int get_str_until_space(char* src, int src_start, char* dst) {
+    int i;
+    for (i = 0; src_start < strlen(src) && src[src_start] != ' '; i++) {
+        dst[i] = src[src_start];
+        src_start++;
+    }
+    dst[i] = '\0';
+    return src_start;
+}
+
+int get_request_url(int client_sd, char* client_ip, char* url) {
+    char client_header[MAX_HEADER_SIZE] = {0};
     int read_size = read(client_sd, client_header, MAX_HEADER_SIZE);
     if (read_size < 0) {
         printf("Read failed\n");
@@ -82,8 +107,14 @@ void get_request_url(int client_sd, char* client_header, char* client_ip) {
 
     if (compare_str(client_header, 0, "GET", 0, 3) == 0) {
         printf("GET Request\n");
+        get_str_until_space(client_header, 4, url);
+        return GET_REQUEST_ID;
     } else if (compare_str(client_header, 0, "POST", 0, 4) == 0) {
         printf("POST Request\n");
+        get_str_until_space(client_header, 5, url);
+        return POST_REQUEST_ID;
+    } else {
+        return UNKNOWN_REQUEST_ID;
     }
 }
 
@@ -101,7 +132,6 @@ int main() {
     // Define client variables
     struct sockaddr_in client;
     socklen_t client_len = sizeof(struct sockaddr_in);
-    char client_header[MAX_HEADER_SIZE] = {0};
     int client_sd = accept(sd, (struct sockaddr*)&client, &client_len);
     char client_ip[24] = {0};
     if (client_sd < 0) {
@@ -113,16 +143,9 @@ int main() {
     printf("Connection accepted with client %s\n", client_ip);
 
     // Read
-    get_request_url(client_sd, client_header, client_ip);
-    // int read_size = read(client_sd, client_header, MAX_HEADER_SIZE);
-    // if (read_size < 0) {
-    //     printf("Read failed\n");
-    //     return -1;
-    // }
-    // printf("Read from client %s\n", client_ip);
-    // printf("========================================\n");
-    // printf("%s", client_header);
-    // printf("========================================\n");
+    char url[MAX_URL_SIZE] = {0};
+    int method = get_request_url(client_sd, client_ip, url);
+    printf("Method = %d, url = %s\n", method, url);
 
     // Write
     // Define response
