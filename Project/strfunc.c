@@ -48,7 +48,20 @@ int get_str_until_space(char *src, int src_start, char *dst) {
     return src_start;
 }
 
+/************************************************************
+ * Function: get_str_line
+ *   Get substr of src from given position until end of line and put in dst
+ *   EX - get_str_line(" \nabc\r\ndef", 0, dst) return 5, dst will be "abc"
+ * Parameters:
+ *   src - original string
+ *   src_start - the start position (including) of src
+ *   dst - the buffer that the substring will be put into
+ * Returns:
+ *   the position of next \n, \r or space or the length or src
+ ************************************************************/
 int get_str_line(char *src, int src_start, char *dst) {
+    dst[0] = '\0'; // clean dst
+
     // remove \r, \n and space from the beginning
     int i = src_start;
     while (i < strlen(src)) {
