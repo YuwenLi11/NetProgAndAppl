@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS = -Wall
 
 all: server
-
-server: server.c strfunc.c
-	${CC} server.c strfunc.c ${CFLAGS} -o $@
+server: server.c strfunc.o
+teststr: teststr.c strfunc.o
+strfunc.o: strfunc.c
 clean:
-	@rm -f server *.o
+	@rm -f server teststr *.o

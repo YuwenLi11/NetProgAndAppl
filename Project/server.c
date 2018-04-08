@@ -24,6 +24,7 @@ struct client_param {
 int start_socket(int port);
 int get_request_url(int client_sd, char *client_ip, char *url);
 void* conn_handler(void *param);
+void get_response(char *res, int method, char *url);
 
 int main() {
     int sd = start_socket(5678);
@@ -150,14 +151,29 @@ void* conn_handler(void *param) {
 
     // Write
     // Define response
-    char server_msg[MAX_HEADER_SIZE] = {0};
-    strcpy(server_msg, "HTTP/1.1 200 OK\r\n\r\n");
-    strcat(server_msg, "Hello world\r\n");
-    if (write(client_sd, server_msg, strlen(server_msg)) < 0) {
+    char res[MAX_HEADER_SIZE] = {0};
+    get_response(res, method, url);
+    if (write(client_sd, res, strlen(res)) < 0) {
         printf("Write failed\n");
         exit(-1);
     }
     printf("Write successful\n\n");
     close(client_sd);
     return 0;
+}
+
+void get_response(char *res, int method, char *url) {
+    switch (method) {
+        case UNKNOWN_REQUEST_ID:
+            strcpy(res, "HTTP/1.1 403 Forbidden\r\n\r\n");
+            break;
+        case GET_REQUEST_ID:
+            strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
+            break;
+        case POST_REQUEST_ID:
+            strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
+            break;
+        default:
+            break;
+    }
 }

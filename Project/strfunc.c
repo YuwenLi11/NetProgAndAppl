@@ -47,3 +47,19 @@ int get_str_until_space(char *src, int src_start, char *dst) {
     dst[i] = '\0';
     return src_start;
 }
+
+int get_str_line(char *src, int src_start, char *dst) {
+    // remove \r, \n and space from the beginning
+    int i = src_start;
+    while (i < strlen(src)) {
+        if (src[i] == '\r' || src[i] == '\n' || src[i] == ' ') i++;
+        else break;
+    }
+
+    int cnt = 0;
+    while (i < strlen(src) && src[i] != '\r' && src[i] != '\n') {
+        dst[cnt++] = src[i++];
+    }
+
+    return i;
+}
