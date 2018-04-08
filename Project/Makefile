@@ -3,7 +3,7 @@ CFLAGS = -Wall
 
 all: server
 
-server: server.c
-	${CC} $< ${CFLAGS} -o $@
+server: server.c strfunc.c
+	${CC} server.c strfunc.c ${CFLAGS} -o $@
 clean:
-	@rm -f server
+	@rm -f server *.o
