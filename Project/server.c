@@ -129,4 +129,13 @@ void *conn_handler(void *param) {
 
 void get_response(char *res, char *client_header) {
     strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
+    char line[32][128];
+    int i = 0, line_cnt = 0;
+    while (i < strlen(client_header)) {
+        i = get_str_line(client_header, i, line[line_cnt]);
+        line_cnt++;
+    }
+    for (int j = 0; j < line_cnt; j++) {
+        printf("Each line: %s\n", line[j]);
+    }
 }
