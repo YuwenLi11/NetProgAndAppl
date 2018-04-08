@@ -93,6 +93,16 @@ int get_str_until_space(char* src, int src_start, char* dst) {
     return src_start;
 }
 
+/************************************************************
+ * Function: get_request_url
+ *   Read from client and get url from the request
+ * Parameters:
+ *   src - original string
+ *   src_start - the start position (including) of src
+ *   dst - the buffer that the substring will be put into
+ * Returns:
+ *   the position of next space or the length of src (it traverses to the end)
+ ************************************************************/
 int get_request_url(int client_sd, char* client_ip, char* url) {
     char client_header[MAX_HEADER_SIZE] = {0};
     int read_size = read(client_sd, client_header, MAX_HEADER_SIZE);

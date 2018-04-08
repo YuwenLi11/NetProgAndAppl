@@ -32,7 +32,7 @@ int main() {
     // Write
     // Define message to be written
     char client_msg[MSG_SIZE] = {0};
-    strcpy(client_msg, "Client say hello");
+    strcpy(client_msg, "GET / HTTP/1.1\r\n\r\n");
     if (write(sd, client_msg, strlen(client_msg)) < 0) {
         printf("Write failed\n");
         return -1;
