@@ -16,6 +16,47 @@
 #define GET_REQUEST_ID 1001
 #define POST_REQUEST_ID 1002
 
+struct client_param {
+    int client_sd;
+    char client_ip[32];
+};
+
+int start_socket(int port);
+int get_request_url(int client_sd, char *client_ip, char *url);
+void* conn_handler(void *param);
+
+int main() {
+    int sd = start_socket(5678);
+
+    // Define client variables
+    struct sockaddr_in client;
+    socklen_t client_len = sizeof(struct sockaddr_in);
+
+    while (1) {
+        // Accept
+        int client_sd = accept(sd, (struct sockaddr *)&client, &client_len);
+        char client_ip[32] = {0};
+        if (client_sd < 0) {
+            printf("Accept failed\n");
+            exit(-1);
+        }
+        // Format client ip address and port into client_ip
+        sprintf(client_ip, "%s:%d", inet_ntoa(client.sin_addr), client.sin_port);
+        printf("Connection accepted with client %s\n", client_ip);
+
+        pthread_t conn_thread;
+        struct client_param param;
+        param.client_sd = client_sd;
+        strcpy(param.client_ip, client_ip);
+        if (pthread_create(&conn_thread, NULL, conn_handler, &param) < 0) {
+            printf("Create thread failed");
+            exit(-1);
+        }
+    }
+
+    return 0;
+}
+
 /************************************************************
  * Function: start_socket
  *   Create a socket, bind and listen
@@ -89,11 +130,14 @@ int get_request_url(int client_sd, char *client_ip, char *url) {
     }
 }
 
-struct client_param {
-    int client_sd;
-    char client_ip[32];
-};
-
+/************************************************************
+ * Function: conn_handler
+ *   Thread executing function, read and write with client by given client_sd
+ * Parameters:
+ *   void *param - a client_param structure
+ * Returns:
+ *   0 - successful
+ ************************************************************/
 void* conn_handler(void *param) {
     struct client_param *cp = (struct client_param *)param;
     int client_sd = cp->client_sd;
@@ -115,37 +159,5 @@ void* conn_handler(void *param) {
     }
     printf("Write successful\n\n");
     close(client_sd);
-    return 0;
-}
-
-int main() {
-    int sd = start_socket(5678);
-
-    // Define client variables
-    struct sockaddr_in client;
-    socklen_t client_len = sizeof(struct sockaddr_in);
-
-    while (1) {
-        // Accept
-        int client_sd = accept(sd, (struct sockaddr *)&client, &client_len);
-        char client_ip[32] = {0};
-        if (client_sd < 0) {
-            printf("Accept failed\n");
-            exit(-1);
-        }
-        // Format client ip address and port into client_ip
-        sprintf(client_ip, "%s:%d", inet_ntoa(client.sin_addr), client.sin_port);
-        printf("Connection accepted with client %s\n", client_ip);
-
-        pthread_t conn_thread;
-        struct client_param param;
-        param.client_sd = client_sd;
-        strcpy(param.client_ip, client_ip);
-        if (pthread_create(&conn_thread, NULL, conn_handler, &param) < 0) {
-            printf("Create thread failed");
-            exit(-1);
-        }
-    }
-
     return 0;
 }
