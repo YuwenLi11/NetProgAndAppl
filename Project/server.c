@@ -10,11 +10,6 @@
 
 #define BACKLOG 10 // queue length
 #define MAX_HEADER_SIZE 1024
-#define MAX_URL_SIZE 1024
-
-#define UNKNOWN_REQUEST_ID 1000
-#define GET_REQUEST_ID 1001
-#define POST_REQUEST_ID 1002
 
 struct client_param {
     int client_sd;
@@ -22,9 +17,8 @@ struct client_param {
 };
 
 int start_socket(int port);
-int get_request_url(int client_sd, char *client_ip, char *url);
-void* conn_handler(void *param);
-void get_response(char *res, int method, char *url);
+void *conn_handler(void *param);
+void get_response(char *res, char *client_header);
 
 int main() {
     int sd = start_socket(5678);
@@ -97,41 +91,6 @@ int start_socket(int port) {
 }
 
 /************************************************************
- * Function: get_request_url
- *   Read from client and get url from the request
- * Parameters:
- *   src - original string
- *   src_start - the start position (including) of src
- *   dst - the buffer that the substring will be put into
- * Returns:
- *   the position of next space or the length of src (it traverses to the end)
- ************************************************************/
-int get_request_url(int client_sd, char *client_ip, char *url) {
-    char client_header[MAX_HEADER_SIZE] = {0};
-    int read_size = read(client_sd, client_header, MAX_HEADER_SIZE);
-    if (read_size < 0) {
-        printf("Read failed\n");
-        exit(-1);
-    }
-    printf("Read from client %s\n", client_ip);
-    printf("========================================\n");
-    printf("%s", client_header);
-    printf("========================================\n");
-
-    if (compare_str(client_header, 0, "GET", 0, 3) == 0) {
-        printf("GET Request\n");
-        get_str_until_space(client_header, 4, url);
-        return GET_REQUEST_ID;
-    } else if (compare_str(client_header, 0, "POST", 0, 4) == 0) {
-        printf("POST Request\n");
-        get_str_until_space(client_header, 5, url);
-        return POST_REQUEST_ID;
-    } else {
-        return UNKNOWN_REQUEST_ID;
-    }
-}
-
-/************************************************************
  * Function: conn_handler
  *   Thread executing function, read and write with client by given client_sd
  * Parameters:
@@ -139,41 +98,35 @@ int get_request_url(int client_sd, char *client_ip, char *url) {
  * Returns:
  *   0 - successful
  ************************************************************/
-void* conn_handler(void *param) {
+void *conn_handler(void *param) {
     struct client_param *cp = (struct client_param *)param;
     int client_sd = cp->client_sd;
     char* client_ip = cp->client_ip;
 
     // Read
-    char url[MAX_URL_SIZE] = {0};
-    int method = get_request_url(client_sd, client_ip, url);
-    printf("Method = %d, url = %s\n", method, url);
+    char client_header[MAX_HEADER_SIZE] = {0};
+    int read_size = read(client_sd, client_header, MAX_HEADER_SIZE);
+    if (read_size < 0) {
+        printf("Read failed\n");
+        exit(-1);
+    }
+    printf("Client header ================\n");
+    printf("%s", client_header);
+    printf("==============================\n");
 
     // Write
     // Define response
     char res[MAX_HEADER_SIZE] = {0};
-    get_response(res, method, url);
+    get_response(res, client_header);
     if (write(client_sd, res, strlen(res)) < 0) {
         printf("Write failed\n");
         exit(-1);
     }
-    printf("Write successful\n\n");
+    printf("Write Response to %s\n\n", client_ip);
     close(client_sd);
     return 0;
 }
 
-void get_response(char *res, int method, char *url) {
-    switch (method) {
-        case UNKNOWN_REQUEST_ID:
-            strcpy(res, "HTTP/1.1 403 Forbidden\r\n\r\n");
-            break;
-        case GET_REQUEST_ID:
-            strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
-            break;
-        case POST_REQUEST_ID:
-            strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
-            break;
-        default:
-            break;
-    }
+void get_response(char *res, char *client_header) {
+    strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
 }
