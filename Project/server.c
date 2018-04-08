@@ -89,7 +89,7 @@ int compare_str(char *str1, int start1, char *str2, int start2, int len) {
  * Returns:
  *   the position of next space or the length of src (it traverses to the end)
  ************************************************************/
-int get_str_until_space(char* src, int src_start, char* dst) {
+int get_str_until_space(char *src, int src_start, char *dst) {
     int i;
     for (i = 0; src_start < strlen(src) && src[src_start] != ' '; i++) {
         dst[i] = src[src_start];
@@ -109,7 +109,7 @@ int get_str_until_space(char* src, int src_start, char* dst) {
  * Returns:
  *   the position of next space or the length of src (it traverses to the end)
  ************************************************************/
-int get_request_url(int client_sd, char* client_ip, char* url) {
+int get_request_url(int client_sd, char *client_ip, char *url) {
     char client_header[MAX_HEADER_SIZE] = {0};
     int read_size = read(client_sd, client_header, MAX_HEADER_SIZE);
     if (read_size < 0) {
@@ -134,22 +134,15 @@ int get_request_url(int client_sd, char* client_ip, char* url) {
     }
 }
 
-int main() {
-    int sd = start_socket(5678);
+struct client_param {
+    int client_sd;
+    char client_ip[32];
+};
 
-    // Accept
-    // Define client variables
-    struct sockaddr_in client;
-    socklen_t client_len = sizeof(struct sockaddr_in);
-    int client_sd = accept(sd, (struct sockaddr*)&client, &client_len);
-    char client_ip[24] = {0};
-    if (client_sd < 0) {
-        printf("Accept failed\n");
-        exit(-1);
-    }
-    // Format client ip address and port into client_ip
-    sprintf(client_ip, "%s:%d", inet_ntoa(client.sin_addr), client.sin_port);
-    printf("Connection accepted with client %s\n", client_ip);
+void* conn_handler(void *param) {
+    struct client_param *cp = (struct client_param *)param;
+    int client_sd = cp->client_sd;
+    char* client_ip = cp->client_ip;
 
     // Read
     char url[MAX_URL_SIZE] = {0};
@@ -163,11 +156,41 @@ int main() {
     strcat(server_msg, "Hello world\r\n");
     if (write(client_sd, server_msg, strlen(server_msg)) < 0) {
         printf("Write failed\n");
-        return -1;
+        exit(-1);
     }
-    printf("Write successful\n");
+    printf("Write successful\n\n");
+    close(client_sd);
+    return 0;
+}
 
-    close(sd);
+int main() {
+    int sd = start_socket(5678);
+
+    // Define client variables
+    struct sockaddr_in client;
+    socklen_t client_len = sizeof(struct sockaddr_in);
+
+    while (1) {
+        // Accept
+        int client_sd = accept(sd, (struct sockaddr *)&client, &client_len);
+        char client_ip[32] = {0};
+        if (client_sd < 0) {
+            printf("Accept failed\n");
+            exit(-1);
+        }
+        // Format client ip address and port into client_ip
+        sprintf(client_ip, "%s:%d", inet_ntoa(client.sin_addr), client.sin_port);
+        printf("Connection accepted with client %s\n", client_ip);
+
+        pthread_t conn_thread;
+        struct client_param param;
+        param.client_sd = client_sd;
+        strcpy(param.client_ip, client_ip);
+        if (pthread_create(&conn_thread, NULL, conn_handler, &param) < 0) {
+            printf("Create thread failed");
+            exit(-1);
+        }
+    }
 
     return 0;
 }
