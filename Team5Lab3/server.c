@@ -126,7 +126,26 @@ void *conn_handler(void *param) {
         int file_size = load_file_to_buffer(file_name, buffer);
         if (file_size == -1) { // couldn't find file or other errors
             // 404 Not Found
+            strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
+            if (write(client_sd, res, strlen(res)) < 0) {
+                printf("Write failed\n");
+                return (void *) -1;
+            }
 
+            // Transfer Error Page
+            if (strcmp(file_name, "") != 0) {
+                sprintf(res, "<!doctype html><html><body>\
+                    <h1>404 Not Found, File %s might not exist</h1>\
+                    </body></html>\r\n\r\n", file_name);
+            } else {
+                sprintf(res, "<!doctype html><html><body>\
+                    <h1>404 Not Found, Please request by given file name</h1>\
+                    </body></html>\r\n\r\n");
+            }
+            if (write(client_sd, res, strlen(res)) < 0) {
+                printf("Write failed\n");
+                return (void *) -1;
+            }
         } else {
             // 200 OK
             strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
@@ -142,17 +161,39 @@ void *conn_handler(void *param) {
                 return (void *) -1;
             }
         }
-    } else if (strcmp(method, "POST") == 0 || strcmp(method, "PUT")) {
+    } else if (strcmp(method, "POST") == 0 || strcmp(method, "PUT") == 0) {
         // 403 Forbidden
+        strcpy(res, "HTTP/1.1 403 Forbidden\r\n\r\n");
+        if (write(client_sd, res, strlen(res)) < 0) {
+            printf("Write failed\n");
+            return (void *) -1;
+        }
+
+        // Transfer Error Page
+        sprintf(res, "<!doctype html><html><body>\
+            <h1>403 Forbidden</h1>\
+            </body></html>\r\n\r\n");
+        if (write(client_sd, res, strlen(res)) < 0) {
+            printf("Write failed\n");
+            return (void *) -1;
+        }
     } else {
         // 400 Bad Request
+        strcpy(res, "HTTP/1.1 400 Bad Request\r\n\r\n");
+        if (write(client_sd, res, strlen(res)) < 0) {
+            printf("Write failed\n");
+            return (void *) -1;
+        }
+
+        // Transfer Error Page
+        sprintf(res, "<!doctype html><html><body>\
+            <h1>400 Bad Request</h1>\
+            </body></html>\r\n\r\n");
+        if (write(client_sd, res, strlen(res)) < 0) {
+            printf("Write failed\n");
+            return (void *) -1;
+        }
     }
-
-    // Write
-    // Define response
-
-
-
 
     printf("Write Response to %s\n\n", client_ip);
     close(client_sd);

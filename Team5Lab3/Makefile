@@ -11,6 +11,6 @@ all: client server
 client: client.c
 	${CC} $< ${CFLAGS} -o $@
 server: server.c
-	${CC} $< ${CFLAGS} -o $@
+	${CC} $< ${CFLAGS} -lpthread -o $@
 clean:
 	@rm -rf client_folder server_folder
