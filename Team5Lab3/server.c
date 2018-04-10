@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>         // string manipulation
@@ -7,11 +8,49 @@
 
 #define BACKLOG 10 // queue length
 #define MAX_HEADER_SIZE 1024
-#define MAX_URL_SIZE 1024
+#define MAX_DATA_SIZE 2048
 
-#define UNKNOWN_REQUEST_ID 1000
-#define GET_REQUEST_ID 1001
-#define POST_REQUEST_ID 1002
+struct client_param {
+    int client_sd;
+    char client_ip[32];
+};
+
+int start_socket(int port);
+void *conn_handler(void *param);
+int get_str_until_space(char *src, int src_start, char *dst);
+int load_file_to_buffer(char *file_name, char *buffer);
+
+int main() {
+    int sd = start_socket(5678);
+
+    // Define client variables
+    struct sockaddr_in client;
+    socklen_t client_len = sizeof(struct sockaddr_in);
+
+    while (1) {
+        // Accept
+        int client_sd = accept(sd, (struct sockaddr *)&client, &client_len);
+        char client_ip[32] = {0};
+        if (client_sd < 0) {
+            printf("Accept failed\n");
+            exit(-1);
+        }
+        // Format client ip address and port into client_ip
+        sprintf(client_ip, "%s:%d", inet_ntoa(client.sin_addr), client.sin_port);
+        printf("Connection accepted with client %s\n", client_ip);
+
+        pthread_t conn_thread;
+        struct client_param param;
+        param.client_sd = client_sd;
+        strcpy(param.client_ip, client_ip);
+        if (pthread_create(&conn_thread, NULL, conn_handler, &param) < 0) {
+            printf("Create thread failed");
+            exit(-1);
+        }
+    }
+
+    return 0;
+}
 
 /************************************************************
  * Function: start_socket
@@ -28,7 +67,6 @@ int start_socket(int port) {
         printf("Couldn't create socket\n");
         exit(-1);
     }
-    printf("TCP socket created\n");
 
     // Set server configuration
     struct sockaddr_in server;
@@ -41,35 +79,84 @@ int start_socket(int port) {
         printf("Bind failed\n");
         exit(-1);
     }
-    printf("Bind successful, listen to port %d\n", port);
+
+    // Listen
+    if (listen(sd, BACKLOG) < 0) {
+        printf("Listen failed\n");
+        exit(-1);
+    }
+    printf("HTTP Server running on port %d\n", port);
 
     return sd;
 }
 
 /************************************************************
- * Function: compare_str
- *   Compare two string with different start position by given length
- *   EX - compare_str("abc", 1, "bcd", 0, 2) return 0, since "bc" equals to "bc"
+ * Function: conn_handler
+ *   Thread executing function, read and write with client by given client_sd
  * Parameters:
- *   str1, str2 - two strings
- *   start1, start2 - start position of the string
- *   len - the length to be compare from two start position
+ *   void *param - a client_param structure
  * Returns:
- *   0 - two string are the same, with the given parameters
- *   1 - two string are not the same, with the given parameters
+ *   0 - successful
  ************************************************************/
-int compare_str(char *str1, int start1, char *str2, int start2, int len) {
-    // check corner case
-    if (start1 + len > strlen(str1) || start2 + len > strlen(str2)) return 1;
+void *conn_handler(void *param) {
+    struct client_param *cp = (struct client_param *)param;
+    int client_sd = cp->client_sd;
+    char* client_ip = cp->client_ip;
 
-    int cnt = 0;
-    while (start1 < strlen(str1) && start2 < strlen(str2) && cnt < len) {
-        if (str1[start1++] != str2[start2++]) {
-            return 1; // not the same
-        }
-        cnt++;
+    // Read
+    char client_header[MAX_HEADER_SIZE] = {0};
+    int read_size = read(client_sd, client_header, MAX_HEADER_SIZE);
+    if (read_size < 0) {
+        printf("Read failed\n");
+        return (void *) -1;
     }
-    return 0; // the same
+    printf("Client header ================\n");
+    printf("%s", client_header);
+    printf("==============================\n");
+
+    // find out HTTP method and request file
+    char method[8], file_name[32];
+    int pos = get_str_until_space(client_header, 0, method); // find method
+    pos = get_str_until_space(client_header, pos + 2, file_name); // find file_name
+    printf("Method = %s, File_name = %s\n", method, file_name);
+
+    // Respond client according given method and file name
+    char res[MAX_HEADER_SIZE] = {0}, buffer[MAX_DATA_SIZE] = {0};
+    if (strcmp(method, "GET") == 0) { // send file
+        int file_size = load_file_to_buffer(file_name, buffer);
+        if (file_size == -1) { // couldn't find file or other errors
+            // 404 Not Found
+
+        } else {
+            // 200 OK
+            strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
+            if (write(client_sd, res, strlen(res)) < 0) {
+                printf("Write failed\n");
+                return (void *) -1;
+            }
+
+            // Transfer data
+            strcpy(res, "The Second Write\r\n\r\n");
+            if (write(client_sd, buffer, file_size) < 0) {
+                printf("Write failed\n");
+                return (void *) -1;
+            }
+        }
+    } else if (strcmp(method, "POST") == 0 || strcmp(method, "PUT")) {
+        // 403 Forbidden
+    } else {
+        // 400 Bad Request
+    }
+
+    // Write
+    // Define response
+
+
+
+
+    printf("Write Response to %s\n\n", client_ip);
+    close(client_sd);
+    return (void *) 0;
 }
 
 /************************************************************
@@ -83,7 +170,7 @@ int compare_str(char *str1, int start1, char *str2, int start2, int len) {
  * Returns:
  *   the position of next space or the length of src (it traverses to the end)
  ************************************************************/
-int get_str_until_space(char* src, int src_start, char* dst) {
+int get_str_until_space(char *src, int src_start, char *dst) {
     int i;
     for (i = 0; src_start < strlen(src) && src[src_start] != ' '; i++) {
         dst[i] = src[src_start];
@@ -94,81 +181,30 @@ int get_str_until_space(char* src, int src_start, char* dst) {
 }
 
 /************************************************************
- * Function: get_request_url
- *   Read from client and get url from the request
+ * Function: load_file_to_buffer
+ *   Read file by a given name
  * Parameters:
- *   src - original string
- *   src_start - the start position (including) of src
- *   dst - the buffer that the substring will be put into
+ *   file_name - file name, in the same path that server is executed
+ *   buffer - the buffer that file content will put into
  * Returns:
- *   the position of next space or the length of src (it traverses to the end)
+ *   >= 0 - file size
+ *   -1 - error
  ************************************************************/
-int get_request_url(int client_sd, char* client_ip, char* url) {
-    char client_header[MAX_HEADER_SIZE] = {0};
-    int read_size = read(client_sd, client_header, MAX_HEADER_SIZE);
-    if (read_size < 0) {
-        printf("Read failed\n");
-        exit(-1);
-    }
-    printf("Read from client %s\n", client_ip);
-    printf("========================================\n");
-    printf("%s", client_header);
-    printf("========================================\n");
+int load_file_to_buffer(char *file_name, char *buffer) {
+    FILE *file;
 
-    if (compare_str(client_header, 0, "GET", 0, 3) == 0) {
-        printf("GET Request\n");
-        get_str_until_space(client_header, 4, url);
-        return GET_REQUEST_ID;
-    } else if (compare_str(client_header, 0, "POST", 0, 4) == 0) {
-        printf("POST Request\n");
-        get_str_until_space(client_header, 5, url);
-        return POST_REQUEST_ID;
-    } else {
-        return UNKNOWN_REQUEST_ID;
-    }
-}
-
-int main() {
-    int sd = start_socket(5678);
-
-    // Listen
-    if (listen(sd, BACKLOG) < 0) {
-        printf("Listen failed\n");
+    file = fopen(file_name, "rb");
+    if (!file) {
+        printf("Couldn't find %s\n", file_name);
         return -1;
     }
-    printf("Listen successful\n");
 
-    // Accept
-    // Define client variables
-    struct sockaddr_in client;
-    socklen_t client_len = sizeof(struct sockaddr_in);
-    int client_sd = accept(sd, (struct sockaddr*)&client, &client_len);
-    char client_ip[24] = {0};
-    if (client_sd < 0) {
-        printf("Accept failed\n");
-        exit(-1);
-    }
-    // Format client ip address and port into client_ip
-    sprintf(client_ip, "%s:%d", inet_ntoa(client.sin_addr), client.sin_port);
-    printf("Connection accepted with client %s\n", client_ip);
+    fread(buffer, MAX_DATA_SIZE, 1, file);
+    fseek(file, 0L, SEEK_END); // in order to find file size
+    int file_size = ftell(file);
 
-    // Read
-    char url[MAX_URL_SIZE] = {0};
-    int method = get_request_url(client_sd, client_ip, url);
-    printf("Method = %d, url = %s\n", method, url);
+    printf("Server read %s, size %d bytes\n", file_name, file_size);
 
-    // Write
-    // Define response
-    char server_msg[MAX_HEADER_SIZE] = {0};
-    strcpy(server_msg, "HTTP/1.1 200 OK\r\n\r\n");
-    strcat(server_msg, "Hello world\r\n");
-    if (write(client_sd, server_msg, strlen(server_msg)) < 0) {
-        printf("Write failed\n");
-        return -1;
-    }
-    printf("Write successful\n");
-
-    close(sd);
-
-    return 0;
+    fclose(file);
+    return file_size;
 }
