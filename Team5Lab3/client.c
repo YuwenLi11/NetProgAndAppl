@@ -15,7 +15,7 @@ int main() {
     scanf("%s", file_name);
 
     // Create socket
-    int sd = socket(AF_INET, SOCK_STREAM, 0); // SOCK_STREAM for TCP
+    int sd = socket(PF_INET, SOCK_STREAM, 0); // PF_INET for BSD
     if (sd < 1) {
         printf("Couldn't create socket\n");
         return -1;
