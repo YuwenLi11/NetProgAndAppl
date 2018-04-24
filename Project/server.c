@@ -11,7 +11,7 @@
 #define BACKLOG 10 // queue length
 #define MAX_HEADER_SIZE 1024
 #define MAX_FILE_SIZE 2048
-#define HTML_FOLDER "html/"
+#define HTML_FOLDER "html"
 
 struct client_param {
     int client_sd;
@@ -147,23 +147,25 @@ void get_response(char *res, char *client_header) {
     char method[8], request_route[32];
     cursor = get_str_until_space(line[0], cursor, method);
     printf("Method = %s\n", method);
-    cursor = get_str_until_space(line[0], cursor + 2, request_route);
+    cursor = get_str_until_space(line[0], cursor, request_route);
     printf("Request Route = %s\n", request_route);
 
-
-    // Response file
-
-    //
-    strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
-
+    // Determine response file path
     char file_path[64], buffer[1024];
-    strcpy(file_path, HTML_FOLDER);
-    strcat(file_path, request_route);
-    load_file_to_buffer(file_path, buffer);
-    strcat(res, buffer);
-    strcat(res, "\r\n");
+    if (strlen(request_route) == 1 &&
+            compare_str(request_route, 0, "/", 0, 1) == 0) { // root
+        sprintf(file_path, "%s/index.html", HTML_FOLDER);
+    } else {
+        sprintf(file_path, "%s%s", HTML_FOLDER, request_route);
+    }
 
-
+    if (load_file_to_buffer(file_path, buffer) == -1) { // err
+      strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
+    } else { // get file successfully
+      strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
+      strcat(res, buffer);
+      strcat(res, "\r\n");
+    }
 }
 
 /************************************************************
