@@ -29,5 +29,12 @@ int main() {
         printf("%s, %d\n", dst, new_pos);
     }
 
+    // strcpy_with_pos_len test
+    char *src3 = "abcde";
+    char dst3[32];
+    printf("strcpy_with_pos_len\n");
+    strcpy_with_pos_len(src3, 1, 2, dst3);
+    printf("%s\n", dst3);
+
     return 0;
 }

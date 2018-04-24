@@ -82,3 +82,20 @@ int get_str_line(char *src, int src_start, char *dst) {
 
     return i;
 }
+
+/************************************************************
+ * Function: strcpy_with_pos_len
+ *   Copy string from src to dst by given start position and length
+ * Parameters:
+ *   src - original string
+ *   src_start - the start position (including) of src
+ *   src_len - the length to be copied
+ *   dst - the buffer that the substring will be put into
+ ************************************************************/
+void strcpy_with_pos_len(char *src, int src_start, int src_len, char *dst) {
+    int i;
+    for (i = 0; i < strlen(src) && i <= src_len; i++) {
+        dst[i] = src[i + src_start];
+    }
+    dst[i] = '\0';
+}
