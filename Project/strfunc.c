@@ -39,6 +39,12 @@ int compare_str(char *str1, int start1, char *str2, int start2, int len) {
  *   the position of next space or the length of src (it traverses to the end)
  ************************************************************/
 int get_str_until_space(char *src, int src_start, char *dst) {
+    // skip space at the beginning
+    while (src[src_start] == ' ') {
+      src_start++;
+    }
+
+    // start to get string
     int i;
     for (i = 0; src_start < strlen(src) && src[src_start] != ' '; i++) {
         dst[i] = src[src_start];
