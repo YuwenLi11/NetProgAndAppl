@@ -10,6 +10,8 @@
 
 #define BACKLOG 10 // queue length
 #define MAX_HEADER_SIZE 1024
+#define MAX_FILE_SIZE 2048
+#define HTML_FOLDER "html/"
 
 struct client_param {
     int client_sd;
@@ -19,6 +21,7 @@ struct client_param {
 int start_socket(int port);
 void *conn_handler(void *param);
 void get_response(char *res, char *client_header);
+int load_file_to_buffer(char *file_name, char *buffer);
 
 int main() {
     int sd = start_socket(5678);
@@ -128,7 +131,7 @@ void *conn_handler(void *param) {
 }
 
 void get_response(char *res, char *client_header) {
-    strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
+    // Parsing client header
     char line[32][128];
     int i = 0, line_cnt = 0;
     while (i < strlen(client_header)) {
@@ -138,4 +141,56 @@ void get_response(char *res, char *client_header) {
     for (int j = 0; j < line_cnt; j++) {
         printf("Each line: %s\n", line[j]);
     }
+
+    // Determine method
+    int cursor = 0;
+    char method[8], request_route[32];
+    cursor = get_str_until_space(line[0], cursor, method);
+    printf("Method = %s\n", method);
+    cursor = get_str_until_space(line[0], cursor + 2, request_route);
+    printf("Request Route = %s\n", request_route);
+
+
+    // Response file
+
+    //
+    strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
+
+    char file_path[64], buffer[1024];
+    strcpy(file_path, HTML_FOLDER);
+    strcat(file_path, request_route);
+    load_file_to_buffer(file_path, buffer);
+    strcat(res, buffer);
+    strcat(res, "\r\n");
+
+
+}
+
+/************************************************************
+ * Function: load_file_to_buffer
+ *   Read file by a given name
+ * Parameters:
+ *   file_name - file name, in the same path that server is executed
+ *   buffer - the buffer that file content will put into
+ * Returns:
+ *   >= 0 - file size
+ *   -1 - error
+ ************************************************************/
+int load_file_to_buffer(char *file_name, char *buffer) {
+    FILE *file;
+
+    file = fopen(file_name, "rb");
+    if (!file) {
+        printf("Couldn't find %s\n", file_name);
+        return -1;
+    }
+
+    fread(buffer, MAX_FILE_SIZE, 1, file);
+    fseek(file, 0L, SEEK_END); // in order to find file size
+    int file_size = ftell(file);
+
+    printf("Server read %s, size %d bytes\n", file_name, file_size);
+
+    fclose(file);
+    return file_size;
 }
