@@ -12,6 +12,9 @@
 #define MAX_HEADER_SIZE 1024
 #define MAX_FILE_SIZE 2048
 #define HTML_FOLDER "html"
+#define COOKIE_USER_ID "HcsUserId="
+
+#define DBG 1
 
 struct client_param {
     int client_sd;
@@ -23,8 +26,13 @@ void *conn_handler(void *param);
 void get_response(char *res, char *client_header);
 int load_file_to_buffer(char *file_name, char *buffer);
 
-int main() {
-    int sd = start_socket(5678);
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Port is required\n");
+        exit(-1);
+    }
+    int port = atoi(argv[1]);
+    int sd = start_socket(port);
 
     // Define client variables
     struct sockaddr_in client;
@@ -50,6 +58,7 @@ int main() {
             printf("Create thread failed");
             exit(-1);
         }
+        sleep(1); // prevent threading problem
     }
 
     return 0;
@@ -70,6 +79,7 @@ int start_socket(int port) {
         printf("Couldn't create socket\n");
         exit(-1);
     }
+    if (DBG) printf("Socket created, sd = %d\n", sd);
 
     // Set server configuration
     struct sockaddr_in server;
@@ -82,12 +92,14 @@ int start_socket(int port) {
         printf("Bind failed\n");
         exit(-1);
     }
+    if (DBG) printf("Bind sd(%d) successful\n", sd);
 
     // Listen
     if (listen(sd, BACKLOG) < 0) {
         printf("Listen failed\n");
         exit(-1);
     }
+    if (DBG) printf("Listen successful\n");
     printf("HTTP Server running on port %d\n", port);
 
     return sd;
@@ -102,20 +114,24 @@ int start_socket(int port) {
  *   0 - successful
  ************************************************************/
 void *conn_handler(void *param) {
+    if (DBG) printf("New thread created\n");
     struct client_param *cp = (struct client_param *)param;
     int client_sd = cp->client_sd;
     char* client_ip = cp->client_ip;
 
     // Read
     char client_header[MAX_HEADER_SIZE] = {0};
+    if (DBG) printf("Ready to read from %s\n", client_ip);
     int read_size = read(client_sd, client_header, MAX_HEADER_SIZE);
     if (read_size < 0) {
         printf("Read failed\n");
         exit(-1);
     }
-    printf("Client header ================\n");
-    printf("%s", client_header);
-    printf("==============================\n");
+    if (DBG) {
+        printf("=== Read successful, client header ===\n");
+        printf("%s", client_header);
+        printf("======================================\n");
+    }
 
     // Write
     // Define response
@@ -125,7 +141,7 @@ void *conn_handler(void *param) {
         printf("Write failed\n");
         exit(-1);
     }
-    printf("Write Response to %s\n\n", client_ip);
+    if (DBG) printf("Write successful, respond to %s\n\n", client_ip);
     close(client_sd);
     return 0;
 }
@@ -138,8 +154,11 @@ void get_response(char *res, char *client_header) {
         i = get_str_line(client_header, i, line[line_cnt]);
         line_cnt++;
     }
-    for (int j = 0; j < line_cnt; j++) {
-        printf("Each line: %s\n", line[j]);
+    if (DBG) {
+        printf("Header each line:\n");
+        for (int j = 0; j < line_cnt; j++) {
+            printf("DBG - Each line: %s\n", line[j]);
+        }
     }
 
     // Determine method
@@ -149,6 +168,15 @@ void get_response(char *res, char *client_header) {
     printf("Method = %s\n", method);
     cursor = get_str_until_space(line[0], cursor, request_route);
     printf("Request Route = %s\n", request_route);
+
+    // Get UserId
+    char userid[32];
+    int errcode = get_from_two_str(client_header, COOKIE_USER_ID, "\n", userid);
+    if (errcode != 0) {
+        printf("%s%s\n", COOKIE_USER_ID, userid);
+    } else {
+        printf("Couldn't find %s\n", COOKIE_USER_ID);
+    }
 
     // Determine response file path
     char file_path[64], buffer[1024];
@@ -162,7 +190,10 @@ void get_response(char *res, char *client_header) {
     if (load_file_to_buffer(file_path, buffer) == -1) { // err
       strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
     } else { // get file successfully
-      strcpy(res, "HTTP/1.1 200 OK\r\n\r\n");
+      strcpy(res, "HTTP/1.1 200 OK\r\n");
+      strcat(res, "Set-Cookie: ");
+      strcat(res, COOKIE_USER_ID);
+      strcat(res, "howard;\r\n\r\n");
       strcat(res, buffer);
       strcat(res, "\r\n");
     }
