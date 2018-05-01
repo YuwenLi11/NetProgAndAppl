@@ -36,5 +36,17 @@ int main() {
     strcpy_with_pos_len(src3, 1, 2, dst3);
     printf("%s\n", dst3);
 
+    // get_from_two_str test
+    char *src4 = "1234567890";
+    char dst4[32];
+    printf("get_from_two_str\n");
+    printf("find 345 789 from %s\n", src4);
+    int ans = get_from_two_str(src4, "345", "7890", dst4);
+    printf("Ans: %d, %s\n", ans, dst4);
+    printf("find 432 789 from %s\n", src4);
+    ans = get_from_two_str(src4, "543", "789", dst4);
+    printf("Ans: %d, %s\n", ans, dst4);
+
+
     return 0;
 }

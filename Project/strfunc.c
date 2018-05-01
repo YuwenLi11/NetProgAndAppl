@@ -94,8 +94,60 @@ int get_str_line(char *src, int src_start, char *dst) {
  ************************************************************/
 void strcpy_with_pos_len(char *src, int src_start, int src_len, char *dst) {
     int i;
-    for (i = 0; i < strlen(src) && i <= src_len; i++) {
+    for (i = 0; i < strlen(src) && i < src_len; i++) {
         dst[i] = src[i + src_start];
     }
     dst[i] = '\0';
+}
+
+/************************************************************
+ * Function: get_start_from_str
+ *   Find the start position of str in src
+ * Parameters:
+ *   src - original string
+ *   start - the start position (including) of src
+ *   str - the string to be found within src
+ * Returns:
+ *   the start position of str in src
+ ************************************************************/
+int get_start_from_str(char *src, int start, char *str) {
+    int f = start, s = start; // fast, slow pointer, find word between [s, f)
+    // find str
+    while (f++ < strlen(src)) {
+        if (src[f] == str[0]) {
+            s = f;
+            int i;
+            for (i = 0; i < strlen(str) && src[f++] == str[i]; i++);
+            if (i == strlen(str)) { // match str
+                return s;
+            }
+        }
+    }
+    return -1;
+}
+
+/************************************************************
+ * Function: get_from_two_str
+ *   Get the content from two str and put it into dst
+ * Parameters:
+ *   src - original string
+ *   str1 - first string to be found within src
+ *   str2 - second string to be found within src
+ *   dst - the buffer that the content between str1, str2 will be put into
+ * Returns:
+ *   0 - not found
+ *   1 - found
+ ************************************************************/
+int get_from_two_str(char *src, char *str1, char *str2, char *dst) {
+    int start1 = get_start_from_str(src, 0, str1);
+    if (start1 == -1) return 0; // not found
+
+    int content_start = start1 + strlen(str1);
+
+    int start2 = get_start_from_str(src, content_start, str2);
+    if (start2 == -1) return 0; // not found
+
+    // assign string to dst
+    strcpy_with_pos_len(src, content_start, start2 - content_start, dst);
+    return 1;
 }
