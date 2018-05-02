@@ -7,12 +7,12 @@
 #include <unistd.h>         // read, write
 
 #include "strfunc.h"
+#include "request.h"
 
 #define BACKLOG 10 // queue length
 #define MAX_HEADER_SIZE 1024
 #define MAX_FILE_SIZE 2048
 #define HTML_FOLDER "html"
-#define COOKIE_USER_ID "HcsUserId="
 
 #define DBG 1
 
@@ -141,7 +141,10 @@ void *conn_handler(void *param) {
         printf("Write failed\n");
         exit(-1);
     }
-    if (DBG) printf("Write successful, respond to %s\n\n", client_ip);
+    if (DBG) {
+        printf("DBG - Write successful, respond to %s\n", client_ip);
+        printf("DBG - Write content: \n%s\n\n", res);
+    }
     close(client_sd);
     return 0;
 }
@@ -183,17 +186,22 @@ void get_response(char *res, char *client_header) {
     if (strlen(request_route) == 1 &&
             compare_str(request_route, 0, "/", 0, 1) == 0) { // root
         sprintf(file_path, "%s/index.html", HTML_FOLDER);
+    } else if (compare_str(request_route, 0, "/login", 0, 6) == 0) { // login
+        char id[16], passwd[16];
+        get_from_two_str(request_route, "id=", "&", id);
+        get_from_two_str(request_route, "passwd=", "", passwd);
+        if (DBG) printf("In login, id=%s, passwd=%s\n", id, passwd);
+        // int req_err = login()
+        return;
     } else {
         sprintf(file_path, "%s%s", HTML_FOLDER, request_route);
     }
 
+    // load file
     if (load_file_to_buffer(file_path, buffer) == -1) { // err
       strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
     } else { // get file successfully
       strcpy(res, "HTTP/1.1 200 OK\r\n");
-      strcat(res, "Set-Cookie: ");
-      strcat(res, COOKIE_USER_ID);
-      strcat(res, "howard;\r\n\r\n");
       strcat(res, buffer);
       strcat(res, "\r\n");
     }

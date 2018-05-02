@@ -132,7 +132,8 @@ int get_start_from_str(char *src, int start, char *str) {
  * Parameters:
  *   src - original string
  *   str1 - first string to be found within src
- *   str2 - second string to be found within src
+ *   str2 - second string to be found within src,
+            empty string as input means get the string to the end
  *   dst - the buffer that the content between str1, str2 will be put into
  * Returns:
  *   0 - not found
@@ -144,8 +145,11 @@ int get_from_two_str(char *src, char *str1, char *str2, char *dst) {
 
     int content_start = start1 + strlen(str1);
 
-    int start2 = get_start_from_str(src, content_start, str2);
-    if (start2 == -1) return 0; // not found
+    int start2 = strlen(src); // special case, get string to the end
+    if (strlen(str2) != 0) {
+      start2 = get_start_from_str(src, content_start, str2);
+      if (start2 == -1) return 0; // not found
+    }
 
     // assign string to dst
     strcpy_with_pos_len(src, content_start, start2 - content_start, dst);

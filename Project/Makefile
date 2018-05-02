@@ -2,7 +2,8 @@ CC = gcc
 CFLAGS = -Wall
 
 all: server
-server: server.c strfunc.o
+server: server.c request.o strfunc.o
+request.o: request.c
 teststr: teststr.c strfunc.o
 strfunc.o: strfunc.c
 clean:
