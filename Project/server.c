@@ -191,7 +191,10 @@ void get_response(char *res, char *client_header) {
         get_from_two_str(request_route, "id=", "&", id);
         get_from_two_str(request_route, "passwd=", "", passwd);
         if (DBG) printf("In login, id=%s, passwd=%s\n", id, passwd);
-        // int req_err = login()
+        login(id, passwd, res);
+        return;
+    } else if (compare_str(request_route, 0, "/logout", 0, 7) == 0) { // logout
+        logout(res);
         return;
     } else {
         sprintf(file_path, "%s%s", HTML_FOLDER, request_route);
