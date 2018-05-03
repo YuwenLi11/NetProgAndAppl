@@ -1,0 +1,47 @@
+# Team5 Lab4-Q1 Readme
+
+## Purpose and Introduction
+Write a complete connection-oriented client – server program using RPC that performs the file server functionality using different file sizes: 900 and 1800 bytes. 
+
+The client should record and display the exact number of bytes received.
+
+## Files
+This folder contains six files
+
+* client_get_file.c
+* get_file.x
+* remote_procedure.c
+* readme.md
+* 1800.txt
+* 900.txt
+
+## Compile
+Make sure the system running the service `rpcbind`.
+In command line, Type in `make`.  Two executable files `server` and  `client` will be compiled and generated.
+Please move `server`, `1800.txt`and `900.txt` into one directory
+Please move `client` into another directory 
+
+Use `make clean` to remove generated files
+
+## Execute
+First, type `./server` to run the UDP server in terminal 1.
+Second, type `./client ` plus `file name` to run the client in terminal 2.
+
+## Test case and expected result
+test case1:
+```
+$ ./server       # server's terminal
+$ ./client 900.txt   # client's terminal
+```
+
+test case2:
+```
+$./server     # server's terminal
+$./client 1800.txt   # client's terminal
+```
+test case3:(no this file exist in server side)
+```
+$./server     # server's terminal
+$./client anything   # client's terminal
+```
+check the file requested has been transferred to client's folder
