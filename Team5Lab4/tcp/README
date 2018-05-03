@@ -1,0 +1,6 @@
+1. make sure the system running the service "rpcbind", and prepare a file named "test.txt";
+2. run "make" under the source code directory, it will generate two binary files: client & server;
+3. run "client" and "server" in different directory;
+4. running server: ./server/
+5. running client: ./client localhost test.txt
+6. check "test.txt" has been transferred to client_bin
