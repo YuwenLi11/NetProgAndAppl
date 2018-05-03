@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Healthcare System</title>
+</head>
+
+<body>
+  <h2>User Page</h2>
+  <p id="user">User: </p>
+  <p id="level">Level: </p>
+</body>
+
+<script>
+
+var id = getCookie("HcsUserId");
+var level = getCookie("HcsUserLevel");
+
+if (id) {
+  console.log("id = ", id);
+  console.log("level = ", level);
+  document.getElementById("user").innerHTML = "User: " + id;
+  document.getElementById("level").innerHTML = "Level: " + level;
+} else {
+  console.log("No such id");
+  document.getElementById("user").innerHTML = "User: Not exist";
+  document.getElementById("level").innerHTML = "Level: X";
+}
+
+function getCookie(name) {
+  cookies = document.cookie.split(";")
+  for (var i in cookies) {
+    var cookie = cookies[i];
+    var splitPoint = cookie.indexOf("=");
+    var key = cookie.substr(1, splitPoint - 1);
+    if (key === name) {
+      var value = cookie.substr(splitPoint + 1);
+      return value === '""' ? undefined : value;
+    }
+  }
+  return undefined;
+}
+
+</script>
+
+</html>
