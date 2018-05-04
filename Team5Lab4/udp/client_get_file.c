@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     
     if (argc == 2) {
         /* create client handle */
-        if ((handle = clnt_create(server, GETFILEPROG, GETFILEVERS, “udp”)) == NULL) {
+        if ((handle = clnt_create(server, GETFILEPROG, GETFILEVERS, "udp")) == NULL) {
             /* couldn't establish connection with server */
         		printf("Can not access rpc service.\n");
             exit(1);
@@ -72,5 +72,3 @@ unsigned int check_file_size(const char *fname)
     }  
     return filesize;  
 }  
-
-
