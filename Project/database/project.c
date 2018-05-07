@@ -409,6 +409,37 @@ int judge(int authority)
     }
 }
 
+void role_id()
+{
+    sprintf(sql,"select id_ from users where name_='%s';",login.name);
+    executesql(sql);
+    g_res=mysql_store_result(g_conn);
+    iNum_rows=mysql_num_rows(g_res);
+    int iNum_fields=mysql_num_fields(g_res);
+    while((g_row=mysql_fetch_row(g_res))){
+    //通过当前登录用户的id查询这个用户的角色id
+    sprintf(sql,"select role_id_ from userRole where user_id_='%s';",g_row[0]);
+    }
+    executesql(sql);
+    g_res=mysql_store_result(g_conn);
+    iNum_rows=mysql_num_rows(g_res);
+    iNum_fields=mysql_num_fields(g_res);
+    while((g_row=mysql_fetch_row(g_res)))
+    {
+        //通过当前用户的角色id查询该用户的权限id
+        if(strcmp(g_row[0],"1")==0)
+        id=1;
+        if(strcmp(g_row[0],"2")==0)
+        id=2;
+        if(strcmp(g_row[0],"3")==0)
+        id=3;
+        if(strcmp(g_row[0],"4")==0)
+        id=4;
+        if(strcmp(g_row[0],"5")==0)
+        id=5;
+        mysql_free_result(g_res); // 释放结果集
+    }
+}
 
 //添加函数
 void add_msg()
@@ -758,7 +789,7 @@ void display()
 void menu()
 {
     while(i)
-    {   
+    {   role_id();
         printf("id is : %d",id);
         int choice;
         system("clear");
@@ -805,20 +836,7 @@ void menu()
     }
 }
 
-void role_id()
-        {
-        sprintf(sql,"select id_ from users where name_='%s';",login.name);
-        executesql(sql);
-        g_res = mysql_store_result(g_conn);
-        iNum_rows = mysql_num_rows(g_res);
-        int iNum_fields = mysql_num_fields(g_res);
-        while((g_row=mysql_fetch_row(g_res))){
-        //通过当前登录用户的id查询这个用户的角色id
-        sprintf(sql,"select role_id_ from userRole where user_id_='%s';",g_row[0]);
-        }
-        executesql(sql);
-        id = g_row[0];
-        }
+
 
 //主函数
 int main(void)
@@ -836,7 +854,6 @@ int main(void)
         //用户登录
         user_login();
         //操作菜单
-        role_id();
         menu();
     }
     // 关闭链接
