@@ -242,6 +242,7 @@
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res);
         if(iNum_rows == 0)
+        mysql_free_result(g_res);
         return 0;
         else
         {
@@ -275,11 +276,12 @@
 
         //查询函数
         void query_msg() {
-        while(1){
+
         int i,j;
         int choice;
         char t_id[20];
 
+        while(1){
         system("clear");
         puts("!!!    Query_msg    !!! ");
         puts("!!!   choice table  !!! ");
