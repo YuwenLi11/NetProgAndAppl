@@ -1,5 +1,6 @@
-#include "strfunc.h"
+#include <stdio.h>
 #include <string.h>
+#include "strfunc.h"
 
 /************************************************************
  * Function: compare_str
@@ -52,6 +53,41 @@ int get_str_until_space(char *src, int src_start, char *dst) {
     }
     dst[i] = '\0';
     return src_start;
+}
+
+/************************************************************
+ * Function: get_restful_route
+ *   Separate restful route into 2-d array
+ *   Ex: route: /api/member/add -> *dst[]: ["api", "member", "add"] and return 3
+ * Parameters:
+ *   route - restful route
+ *   dst - 2-d array to be put the result
+ * Returns:
+ *   the number of dst array
+ *   -1 - error
+ ************************************************************/
+int get_restful_route(char *route, char dst[][32]) {
+    if (strlen(route) == 0) {
+        printf("[Error] get_restful_route, no input\n");
+        return -1;
+    } else if (route[0] != '/') {
+      printf("[Error] get_restful_route, syntax error\n");
+        return -1;
+    }
+
+    int i = 1;
+    int count = 0;
+    while (i < strlen(route)) {
+        int j;
+        for (j = 0; i + j < strlen(route) && route[i + j] != '/'; j++) {
+            dst[count][j] = route[i + j];
+        }
+        dst[count][j] = '\0';
+        i += j + 1; // skip slash
+        count++;
+    }
+
+    return count;
 }
 
 /************************************************************

@@ -47,6 +47,15 @@ int main() {
     ans = get_from_two_str(src4, "543", "789", dst4);
     printf("Ans: %d, %s\n", ans, dst4);
 
+    // get_restful_route test
+    char *src5 = "/api/member/add";
+    char dst5[8][32];
+    printf("get_restful_route\n");
+    int count = get_restful_route(src5, dst5);
+    int i;
+    for (i = 0; i < count; i++) {
+        printf("restful_count %d: %s\n", i, dst5[i]);
+    }
 
     return 0;
 }
