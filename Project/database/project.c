@@ -678,21 +678,15 @@ void delete_msg()
 {
     int o,op;
     char p;
+    char d_id[20];
     char ID[20];
-    //通过权限判定函数的返回值决定是否可以进行删改用户操作
-    if(judge(4) == 0){
-        puts("!!!Insufficient permissions!!! ");
-        while ((getchar()) != '\n');
-        getchar();
-        //权限不够，退出函数
-        return ;
-    }
+
     //可以执行
     system("clear");
-    puts("!!!     alter_msg  !!! ");
-    printf("    Name：");scanf("%s",ope.name);
+    puts("!!!     delete_msg  !!! ");
+    printf("    ID：");scanf("%s",d_id);
     //判断要进行删改的用户是不是管理员用户，禁止对管理员用户进行删改操作
-    if(strcmp(ope.name,"root") == 0)
+    if(strcmp(d_id,"1") == 0)
     {
         puts("ROOT user deletion is prohibited");
         while ((getchar()) != '\n');
@@ -700,7 +694,7 @@ void delete_msg()
         return;
     }
     //通过用户名和密码查看用户表中是否有该用户
-    sprintf(sql,"select id_ from users where name_='%s';",ope.name);
+    sprintf(sql,"select id_ from users where id_='%s';",d_id);
     executesql(sql);
     g_res = mysql_store_result(g_conn);
     iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
@@ -787,23 +781,27 @@ void display()
 }
     //操作菜单
 void menu()
-{
-    while(i)
-    {   role_id();
-        printf("id is : %d",id);
-        int choice;
-        system("clear");
-        puts("!!!     choice：  !!! ");
-        puts("!!! 1:query   msg !!! ");
-        puts("!!! 2:add  user !!! ");
-        puts("!!! 3:alter msg !!! ");
-        puts("!!! 4:delete msg !!! ");
-        puts("!!! 5:display all !!! ");
-        puts("!!! 6:exit  login !!! ");
-        puts("!!! 0:exit system !!! ");
-        scanf("%d",&choice);
-        switch(choice)
+{   role_id();
+    printf("id is : %d",id);
+    switch(id)
         {
+        case 1:
+        {
+            while(i)
+            {
+            int choice;
+            system("clear");
+            puts("!!!     choice：  !!! ");
+            puts("!!! 1:query   msg !!! ");
+            puts("!!! 2:add  user !!! ");
+            puts("!!! 3:alter msg !!! ");
+            puts("!!! 4:delete msg !!! ");
+            puts("!!! 5:display all !!! ");
+            puts("!!! 6:exit  login !!! ");
+            puts("!!! 0:exit system !!! ");
+            scanf("%d",&choice);
+            switch(choice)
+            {
             case 1:
             query_msg();//无需判断权限，所有角色均可使用此查询
             break;
@@ -832,9 +830,231 @@ void menu()
             while ((getchar()) != '\n');
             getchar();
             break;
+            }
+            }
         }
-    }
+        
+        case 2:
+        {
+        while(i)
+        {
+        int choice;
+        system("clear");
+        puts("!!!     choice：  !!! ");
+        puts("!!! 1:query   msg !!! ");
+        puts("!!! 2:add  user !!! ");
+        puts("!!! 3:alter msg !!! ");
+        puts("!!! 4:delete msg !!! ");
+        puts("!!! 5:display all !!! ");
+        puts("!!! 6:exit  login !!! ");
+        puts("!!! 0:exit system !!! ");
+        scanf("%d",&choice);
+        switch(choice)
+        {
+        case 1:
+        query_msg();//无需判断权限，所有角色均可使用此查询
+        break;
+        case 2:
+        add_msg();//添加用户操作
+        break;
+        case 3:
+        alter_msg();//改用户操作
+        break;
+        case 4:
+        delete_msg();//删用户操作
+        break;
+        case 5:
+        display();//显示所有用户及用户角色
+        break;
+        case 6:
+        //退出登录
+        flag = 0;//管理员权限开关
+        return;
+        case 0:
+        puts("!!! thank you for using !!! ");//退出系统
+        i = 0;
+        break;
+        default :
+        puts("!!! enter right choice !!! ");
+        while ((getchar()) != '\n');
+        getchar();
+        break;
+        }
+        }
+        }
+        
+        case 3:
+        {
+        while(i)
+        {
+        int choice;
+        system("clear");
+        puts("!!!     choice：  !!! ");
+        puts("!!! 1:query   msg !!! ");
+        puts("!!! 2:add  user !!! ");
+        puts("!!! 3:alter msg !!! ");
+        puts("!!! 4:delete msg !!! ");
+        puts("!!! 5:display all !!! ");
+        puts("!!! 6:exit  login !!! ");
+        puts("!!! 0:exit system !!! ");
+        scanf("%d",&choice);
+        switch(choice)
+        {
+        case 1:
+        query_msg();//无需判断权限，所有角色均可使用此查询
+        break;
+        case 2:
+        add_msg();//添加用户操作
+        break;
+        case 3:
+        alter_msg();//改用户操作
+        break;
+        case 4:
+        delete_msg();//删用户操作
+        break;
+        case 5:
+        display();//显示所有用户及用户角色
+        break;
+        case 6:
+        //退出登录
+        flag = 0;//管理员权限开关
+        return;
+        case 0:
+        puts("!!! thank you for using !!! ");//退出系统
+        i = 0;
+        break;
+        default :
+        puts("!!! enter right choice !!! ");
+        while ((getchar()) != '\n');
+        getchar();
+        break;
+        }
+        }
+        }
+        
+        case 4:
+        {
+            while(i)
+            {
+                int choice;
+                system("clear");
+                puts("!!!     choice：  !!! ");
+                puts("!!! 1:query   msg !!! ");
+                puts("!!! 2:alter msg !!! ");
+                puts("!!! 3:exit  login !!! ");
+                puts("!!! 0:exit system !!! ");
+                scanf("%d",&choice);
+                switch(choice)
+                {
+                    case 1:
+                    query_msg();//无需判断权限，所有角色均可使用此查询
+                    break;
+                    case 2:
+                    alter_msg();//改用户操作
+                    break;
+                    case 3:
+                    //退出登录
+                    flag = 0;//管理员权限开关
+                    return;
+                    case 0:
+                    puts("!!! thank you for using !!! ");//退出系统
+                    i = 0;
+                    break;
+                    default :
+                    puts("!!! enter right choice !!! ");
+                    while ((getchar()) != '\n');
+                    getchar();
+                    break;
+                }
+            }
+        }
+        
+        case 5:
+        {
+            while(i)
+            {
+                int choice;
+                system("clear");
+                puts("!!!     choice：  !!! ");
+                puts("!!! 1:show   msg !!! ");
+                puts("!!! 2:alter msg !!! ");
+                puts("!!! 3:exit  login !!! ");
+                puts("!!! 0:exit system !!! ");
+                scanf("%d",&choice);
+                switch(choice)
+                {
+                    case 1:
+                    query_msg();//无需判断权限，所有角色均可使用此查询
+                    break;
+                    case 2:
+                    alter_msg();//改用户操作
+                    break;
+                    case 3:
+                    //退出登录
+                    flag = 0;//管理员权限开关
+                    return;
+                    case 0:
+                    puts("!!! thank you for using !!! ");//退出系统
+                    i = 0;
+                    break;
+                    default :
+                    puts("!!! enter right choice !!! ");
+                    while ((getchar()) != '\n');
+                    getchar();
+                    break;
+                }
+            }
+        }
+        default :
+        puts("!!! role id error !!! ");
+        }
 }
+//    while(i)
+//    {   
+//        int choice;
+//        system("clear");
+//        puts("!!!     choice：  !!! ");
+//        puts("!!! 1:query   msg !!! ");
+//        puts("!!! 2:add  user !!! ");
+//        puts("!!! 3:alter msg !!! ");
+//        puts("!!! 4:delete msg !!! ");
+//        puts("!!! 5:display all !!! ");
+//        puts("!!! 6:exit  login !!! ");
+//        puts("!!! 0:exit system !!! ");
+//        scanf("%d",&choice);
+//        switch(choice)
+//        {
+//            case 1:
+//            query_msg();//无需判断权限，所有角色均可使用此查询
+//            break;
+//            case 2:
+//            add_msg();//添加用户操作
+//            break;
+//            case 3:
+//            alter_msg();//改用户操作
+//            break;
+//            case 4:
+//            delete_msg();//删用户操作
+//            break;
+//            case 5:
+//            display();//显示所有用户及用户角色
+//            break;
+//            case 6:
+//            //退出登录
+//            flag = 0;//管理员权限开关
+//            return;
+//            case 0:
+//            puts("!!! thank you for using !!! ");//退出系统
+//            i = 0;
+//            break;
+//            default :
+//            puts("!!! enter right choice !!! ");
+//            while ((getchar()) != '\n');
+//            getchar();
+//            break;
+//        }
+//    }
+//}
 
 
 
