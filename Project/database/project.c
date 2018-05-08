@@ -567,23 +567,55 @@ void delete_msg()
 
 void show_msg()
         {
-
+        int o,op;
+        char p;
+        char ID[20];
+        
         sprintf(sql,"select * from users where name_='%s' and password_='%s';",login.name,login.password);
         executesql(sql);
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res); // 得到记录的行数
         int iNum_fields=mysql_num_fields(g_res);
         //将该用户id取出来备用
+        while((g_row=mysql_fetch_row(g_res))){
+        sprintf(ID,"%s",g_row[0]);
+        }
+        
         system("clear");
-        puts("!!!  personal information  !!! \n");
-        puts("id_  | name_ |password_|    prescription_    |insurance_  ");
-        while((g_row=mysql_fetch_row(g_res)))
-        printf("%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4]);
-        mysql_free_result(g_res);
+        puts("!!!    alter_msg    !!! ");
+        puts("!!!  1:change  name   !!! ");
+        puts("!!!  2:change passwd  !!! ");
+        printf("!!!      choice：     !");scanf("%d",&o);
+        switch(o)
+        {
+        case 1:
+        system("clear");
+        puts("!!!    alter_msg    !!! ");
+        printf("!!!    enter name: ");scanf("%s",ope.name);
+        //更新用户名
+        sprintf(sql,"update users set name_='%s' where id_=%s;",ope.name,ID);
+        executesql(sql);
+        break;
+        case 2:
+        system("clear");
+        puts("!!!    alter_msg    !!! ");
+        printf("!!!    enter password: ");scanf("%s",ope.passwd);
+        //更新密码
+        sprintf(sql,"update users set password_='%s' where id_=%s;",ope.passwd,ID);
+        executesql(sql);
+        break;
+
+        default :
+        puts("!!! enter right choice !!! ");
         while ((getchar()) != '\n');
         getchar();
         }
-
+        puts("!!! success !!! ");
+        mysql_free_result(g_res);
+        while ((getchar()) != '\n');
+        getchar();
+    }
+        
 
 //显示所有用户及用户角色函数
 void display()
@@ -834,7 +866,7 @@ void menu()
                     show_msg();//无需判断权限，所有角色均可使用此查询
                     break;
                     case 2:
-                    alter_msg();//改用户操作
+                    alter_msg_p();//改用户操作
                     break;
                     case 3:
                     //退出登录
