@@ -567,10 +567,28 @@ void delete_msg()
 
 void show_msg()
         {
+        sprintf(sql,"select * from users where name_='%s' and password_='%s';",login.name,login.password);
+        executesql(sql);
+        g_res=mysql_store_result(g_conn);
+        iNum_rows=mysql_num_rows(g_res); // 得到记录的行数
+        int iNum_fields=mysql_num_fields(g_res);
+        //将该用户id取出来备用
+        system("clear");
+        puts("!!!  personal information  !!! \n");
+        puts("id_  | name_ |password_|    prescription_    |insurance_  ");
+        while((g_row=mysql_fetch_row(g_res)))
+        printf("%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4]);
+        mysql_free_result(g_res);
+        while ((getchar()) != '\n');
+        getchar();
+        }
+        
+void alter_msg_p();
+        {
         int o,op;
         char p;
         char ID[20];
-        
+
         sprintf(sql,"select * from users where name_='%s' and password_='%s';",login.name,login.password);
         executesql(sql);
         g_res=mysql_store_result(g_conn);
@@ -580,7 +598,7 @@ void show_msg()
         while((g_row=mysql_fetch_row(g_res))){
         sprintf(ID,"%s",g_row[0]);
         }
-        
+
         system("clear");
         puts("!!!    alter_msg    !!! ");
         puts("!!!  1:change  name   !!! ");
@@ -614,9 +632,9 @@ void show_msg()
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
         getchar();
-    }
+        }
         
-
+        
 //显示所有用户及用户角色函数
 void display()
 {
