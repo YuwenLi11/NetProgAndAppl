@@ -2,7 +2,7 @@
 * 标题：C语言链接mysql数据库，实现可以增删改查的角色权限登录系统
 *
 * 描述：本代码可在安装GCC编译环境和mysql集成环境下直接编译运行，根据不同使用者的mysql账户可修改代码前面的内容以成功连接mysql数据库
-* 编译命令：gcc mysqltest.c -lmysqlclient -o mysqltest
+* 编译命令：gcc project.c -lmysqlclient -o project
 ********************************************************************/
 
 #include <stdio.h>
@@ -34,9 +34,7 @@ int id = 0;//role id
 struct Login {
 	char name[24];
     char password[20];
-}
-
-login;
+}login;
 //操作使用的结构体
 struct Operation {
 	char tables[24];
@@ -45,9 +43,7 @@ struct Operation {
     char role[24];
     char prescription[20];
     char insurance[20];
-}
-
-ope;
+}ope;
 //打印错误信息
 void print_mysql_error(const char *msg) {
 	if(msg)
@@ -400,10 +396,10 @@ puts("No such person!");
     while ((getchar()) != '\n');
     getchar();
 }
-    //进入删改选择
+    //进入改选择
 else {
 system("clear");
-    puts("!!!    del_alt_msg    !!! ");
+    puts("!!!    alt_msg    !!! ");
     puts("!!!  1:change  name   !!! ");
     puts("!!!  2:change passwd  !!! ");
     puts("!!!  3:change  role   !!! ");
@@ -413,7 +409,7 @@ system("clear");
     switch(o)
     {
     case 1: system("clear");
-puts("!!!    del_alt_msg    !!! ");
+puts("!!!    alt_msg    !!! ");
     printf("!!!    enter name: ");scanf("%s",ope.name);
     //更新用户名
     sprintf(sql,"update users set name_='%s' where id_=%s;",ope.name,ID);
@@ -427,7 +423,7 @@ puts("!!!    del_alt_msg    !!! ");
     executesql(sql);
     break;
     case 3: system("clear");
-puts("!!!    del_alt_msg    !!! ");
+puts("!!!    alt_msg    !!! ");
     puts("!!!      1.ADMINISTRITOR       !!! ");
     puts("!!!      2.HEALTH CARE PROVIDER      !!! ");
     puts("!!!      3.INSURANCE COMPANY   !!! ");
@@ -488,6 +484,7 @@ puts("!!! success !!! ");
 }
 }
 
+//删函数
 void delete_msg() {
 int o,op;
     char p;
@@ -543,6 +540,7 @@ executesql(sql);
     }
 }
 
+//show self information
 void show_msg() {
 sprintf(sql,"select * from users where name_='%s' and password_='%s';",login.name,login.password);
         executesql(sql);
@@ -560,6 +558,7 @@ sprintf(sql,"select * from users where name_='%s' and password_='%s';",login.nam
         getchar();
 }
 
+//alter self information
 void alter_self() {
 int o,op;
         char p;
@@ -651,8 +650,9 @@ role_id();
     printf("id is : %d",id);
     switch(id)
         {
-        case 1: {   flag=1;
-while(i)
+//root
+case 1: {   flag=1;
+	while(i)
             {
             int choice;
             system("clear");
@@ -668,21 +668,21 @@ while(i)
             switch(choice)
             {
             case 1: query_msg();
-//无需判断权限，所有角色均可使用此查询
+
             break;
             case 2: add_msg();
-//添加用户操作
+
             break;
             case 3: alter_msg();
-//改用户操作
+
             break;
             case 4: delete_msg();
-//删用户操作
+
             break;
             case 5: display();
-//显示所有用户及用户角色
+
             break;
-            case 6: //退出登录
+            case 6:
             flag = 0;
 //管理员权限开关
             return;
@@ -698,6 +698,7 @@ while ((getchar()) != '\n');
             }
         }
 
+//admin
 case 2: {
 flag=1;
         while(i)
@@ -716,19 +717,19 @@ flag=1;
         switch(choice)
         {
         case 1: query_msg();
-//无需判断权限，所有角色均可使用此查询
+
         break;
         case 2: add_msg();
-//添加用户操作
+
         break;
         case 3: alter_msg();
-//改用户操作
+
         break;
         case 4: delete_msg();
-//删用户操作
+
         break;
         case 5: display();
-//显示所有用户及用户角色
+
         break;
         case 6: //退出登录
         flag = 0;
@@ -745,7 +746,8 @@ while ((getchar()) != '\n');
 }
         }
         }
-
+		    
+//doctor
 case 3: {
 flag =1;
         while(i)
@@ -764,19 +766,19 @@ flag =1;
         switch(choice)
         {
         case 1: query_msg();
-//无需判断权限，所有角色均可使用此查询
+
         break;
         case 2: add_msg();
-//添加用户操作
+
         break;
         case 3: alter_msg();
-//改用户操作
+
         break;
         case 4: delete_msg();
-//删用户操作
+
         break;
         case 5: display();
-//显示所有用户及用户角色
+
         break;
         case 6: //退出登录
         flag = 0;
@@ -794,6 +796,7 @@ while ((getchar()) != '\n');
         }
         }
 
+//insurance company
 case 4: {
 while(i)
             {
@@ -808,10 +811,10 @@ while(i)
                 switch(choice)
                 {
                     case 1: query_msg();
-//无需判断权限，所有角色均可使用此查询
+
                     break;
                     case 2: alter_msg();
-//改用户操作
+
                     break;
                     case 3: //退出登录
                     flag = 0;
@@ -829,6 +832,7 @@ while ((getchar()) != '\n');
             }
         }
 
+//patient
 case 5: {
 while(i)
             {
@@ -843,10 +847,10 @@ while(i)
                 switch(choice)
                 {
                     case 1: show_msg();
-//无需判断权限，所有角色均可使用此查询
+
                     break;
                     case 2: alter_self();
-//改用户操作
+
                     flag = 0;
                     return;
                     case 3: //退出登录
