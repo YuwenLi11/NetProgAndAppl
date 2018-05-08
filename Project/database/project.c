@@ -40,7 +40,7 @@
         char tables[24];
         char name[24];
         char passwd[20];
-        char role[24];
+        int role;
         char prescription[20];
         char insurance[20];
         }ope;
@@ -181,9 +181,9 @@
         int judge(char user_id[20])
         {
         int target_id;
- 
+
         //通过当前登录用户的id查询这个用户的角色id
-        sprintf(sql,"select role_id_ from users where user_id_='%s';",user_id));
+        sprintf(sql,"select role_id_ from users where id_='%s';",user_id);
         executesql(sql);
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res);
@@ -194,7 +194,7 @@
         }
         else
         {
-        iNum_fields=mysql_num_fields(g_res);
+        int iNum_fields=mysql_num_fields(g_res);
         while((g_row=mysql_fetch_row(g_res))) {
 //通过当前用户的角色id查询该用户的权限id
         if(strcmp(g_row[0],"1")==0)
