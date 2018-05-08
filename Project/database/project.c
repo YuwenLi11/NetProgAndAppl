@@ -411,22 +411,17 @@ default :
         break;
         case 3: system("clear");
         puts("!!!    alt_msg    !!! ");
-        puts("!!!      1.ADMINISTRITOR       !!! ");
-        puts("!!!      2.HEALTH CARE PROVIDER      !!! ");
-        puts("!!!      3.PATIENT   !!! ");
+        puts("!!!      1.HEALTH CARE PROVIDER      !!! ");
+        puts("!!!      2.PATIENT   !!! ");
         printf("!!!      choice：     !");scanf("%d",&op);
         switch(op)
         {
-        case 1: //设置角色为admin
+        case 1: //设置角色为doctor
+        sprintf(sql,"update users set role_id_=1 where user_id_=%s;",ID);
+        executesql(sql);
+        break;
+        case 2: //设置角色为patient
         sprintf(sql,"update users set role_id_=2 where user_id_=%s;",ID);
-        executesql(sql);
-        break;
-        case 2: //设置角色为doctor
-        sprintf(sql,"update users set role_id_=3 where user_id_=%s;",ID);
-        executesql(sql);
-        break;
-        case 3: //设置角色为patient
-        sprintf(sql,"update users set role_id_=4 where user_id_=%s;",ID);
         executesql(sql);
         break;
 default: puts("!!! enter right choice !!! ");
@@ -442,8 +437,8 @@ default :
         getchar();
         }
         }
-        
-        else 
+
+        else
         {
         system("clear");
         puts("!!!  change prescription  !!! ");
@@ -452,7 +447,7 @@ default :
         sprintf(sql,"update users set description_='%s' where id_=%s;",ope.prescription,ID);
         executesql(sql);
         }
-        
+
         puts("!!! success !!! ");
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
