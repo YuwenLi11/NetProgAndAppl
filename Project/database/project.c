@@ -32,34 +32,38 @@
         int id = 0;//role id
 //登录使用的结构体
         struct Login {
-        char name[24];
+	char name[24];
         char password[20];
-        }login;
+}
+
+login;
 //操作使用的结构体
         struct Operation {
-        char tables[24];
+	char tables[24];
         char name[24];
         char passwd[20];
         int role;
         char prescription[20];
         char insurance[20];
-        }ope;
+}
+
+ope;
 //打印错误信息
         void print_mysql_error(const char *msg) {
-        if(msg)
+	if(msg)
         printf("%s: %s\n",msg,mysql_error(g_conn));
         else
         puts(mysql_error(g_conn));
-        }
+}
         //执行sql语句，成功返回0，失败返回-1
         int executesql(const char * sql) {
-        if(mysql_real_query(g_conn,sql,strlen(sql)))
+	if(mysql_real_query(g_conn,sql,strlen(sql)))
         return -1;
         return 0;
-        }
+}
 //初始化链接
-        int init_mysql() {
-        //init the database connection
+int init_mysql() {
+	//init the database connection
         g_conn = mysql_init(NULL);
         //connection the database
         if(!mysql_real_connect(g_conn,g_host_name,g_user_name,g_password,g_db_name,g_db_port,NULL,0))
@@ -68,10 +72,10 @@
         if(executesql("set names utf8"))
         return -1;
         return 0;//返回成功
-        }
+}
 //选择数据库，没有的时候创建
-        void create_database() {
-        sprintf(sql,"use project");
+void create_database() {
+	sprintf(sql,"use project");
         if(executesql(sql) == -1)
         {
         puts("create database");
@@ -81,16 +85,16 @@
         executesql("use project;");
         print_mysql_error(NULL);
         puts("!!!Initialize the success!!!");
-        }
+}
 
-        else {
-        executesql("use project;");
+else {
+	executesql("use project;");
         print_mysql_error(NULL);
-        }
+}
         }
 //查看表格完整性
-        void create_table() {
-        //users表的检查与创建
+void create_table() {
+	//users表的检查与创建
         sprintf(sql,"show tables;");
         executesql(sql);
         g_res = mysql_store_result(g_conn);
@@ -99,12 +103,12 @@
         {
         puts("create users table");
         executesql("create table users(id_ smallint unsigned primary key auto_increment,role_id_ smallint unsigned,name_ varchar(24) not null unique,password_ char(20) not null,prescription_ varchar(200),insurance_ varchar(200));");
-         }
+}
 
-        mysql_free_result(g_res); // 释放结果集
-        }
+mysql_free_result(g_res); // 释放结果集
+}
         //初始化管理员账户
-        void init_Administrtor() {
+void init_Administrtor() {
 //查询users表
         sprintf(sql,"select * from users where id_='1' and name_='root';");
         executesql(sql);
@@ -116,13 +120,14 @@
         //插入管理员用户
         sprintf(sql,"insert into users values(1,1,'root','123','n/a','n/a');");
         executesql(sql);
-        }
-        mysql_free_result(g_res); // 释放结果集
-        }
+}
+
+mysql_free_result(g_res); // 释放结果集
+}
 
         //用户登录
-        void user_login() {
-        puts("Init success! Please press any key to continue");
+void user_login() {
+puts("Init success! Please press any key to continue");
         while(1)
         {
         while ((getchar()) != '\n');
@@ -142,20 +147,20 @@
         while ((getchar()) != '\n');
         getchar();
         break;
-        }
+}
 
-        else {
-        puts("!!!Login Failed!!! Check name or password!");
+else {
+puts("!!!Login Failed!!! Check name or password!");
         while ((getchar()) != '\n');
-        }
+}
         }
 
-        mysql_free_result(g_res); // 释放结果集
-        }
+mysql_free_result(g_res); // 释放结果集
+}
 
 //查询当前用户role_id
         void role_id() {
-        sprintf(sql,"select role_id_ from users where name_='%s';",login.name);
+sprintf(sql,"select role_id_ from users where name_='%s';",login.name);
         executesql(sql);
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res);
@@ -173,14 +178,13 @@
         if(strcmp(g_row[0],"5")==0)
         id=5;
         mysql_free_result(g_res); // 释放结果集
-        }
+}
         }
 
 
 //judge target user role_id
-        int judge(char user_id[20])
-        {
-        int target_id;
+        int judge(char user_id[20]) {
+int target_id;
 
         //通过当前登录用户的id查询这个用户的角色id
         sprintf(sql,"select role_id_ from users where id_='%s';",user_id);
@@ -191,10 +195,10 @@
         {
         mysql_free_result(g_res);
         return 0;
-        }
-        else
-        {
-        int iNum_fields=mysql_num_fields(g_res);
+}
+
+else {
+int iNum_fields=mysql_num_fields(g_res);
         while((g_row=mysql_fetch_row(g_res))) {
 //通过当前用户的角色id查询该用户的权限id
         if(strcmp(g_row[0],"1")==0)
@@ -212,20 +216,19 @@
         {
         mysql_free_result(g_res); // 释放结果集
         return 1;
-        }
-        else
-        {
-        mysql_free_result(g_res); // 释放结果集
+}
+
+else {
+mysql_free_result(g_res); // 释放结果集
         return 0;
-        }
+}
         }
         }
         }
 
         //查询函数
-        void query_msg() {
-
-        int i,j;
+void query_msg() {
+int i,j;
         int choice;
         char t_id[20];
 
@@ -238,9 +241,8 @@
         scanf("%d",&choice);
         switch(choice)
         {
-        case 1:
-        system("clear");
-        puts("!!!   enter id !!! ");
+        case 1: system("clear");
+puts("!!!   enter id !!! ");
         printf("id：");scanf("%s",t_id);
         //在指定表中查询用户名相关信息
         if(judge(t_id) == 0){
@@ -249,15 +251,16 @@
         getchar();
         //权限不够，退出函数
         return ;
-        }
-        sprintf(sql,"select * from users where id_='%s';",t_id);
+}
+
+sprintf(sql,"select * from users where id_='%s';",t_id);
         executesql(sql);
         g_res = mysql_store_result(g_conn);
         iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
         system("clear");
 
         int iNum_fields = mysql_num_fields(g_res); // 得到记录的列数
-        puts("id_  | role_id_ | name_ |password_|    prescription_    |insurance_  ");
+        puts("id_|role_id_ | name_ |password_|    prescription_    |insurance_  ");
         while((g_row=mysql_fetch_row(g_res)))
         printf("%s\t%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4],g_row[5]);
 
@@ -274,15 +277,15 @@ default :
         while ((getchar()) != '\n');
         getchar();
         break;
-        }
+}
         }
         }
 
 
 
 //添加函数
-        void add_msg() {
-        int o;
+void add_msg() {
+int o;
         char ID[20];
         //通过权限判定函数的返回值决定是否可以进行添加用户操作
 
@@ -304,27 +307,26 @@ default :
         int iNum_fields = mysql_num_fields(g_res);
         while((g_row=mysql_fetch_row(g_res))){
         sprintf(ID,"%s",g_row[0]);
-        }
+}
         //备注
-        printf("  Prescription：");scanf("%s",ope.prescription);
+printf("  Prescription：");scanf("%s",ope.prescription);
         //insurance
         printf(" Insurance Status: ");scanf("%s",ope.insurance);
         //role
-        printf(" 2: ADMINISTRITOR\n3: HEALTHY CARE PROVIDER\n4: INSURANCE COMPANY\n5: PATIENT");scanf("%d",ope.role);
+        printf(" ROLE:\n2: ADMINISTRITOR\n3: HEALTHY CARE PROVIDER\n4: INSURANCE COMPANY\n5: PATIENT\n");scanf("%d",&ope.role);
         //向用户表中插入一个新的用户的信息
         sprintf(sql,"insert into users values(%d,%d,'%s','%s','%s','%s');",i,ope.role,ope.name,ope.passwd,ope.prescription,ope.insurance);
         executesql(sql);
         puts("!!! success !!! ");
         while ((getchar()) != '\n');
         getchar();
-
-        }
+}
 
 
 
 //改函数
-        void alter_msg() {
-        int o,op;
+void alter_msg() {
+int o,op;
         char p;
         char ID[20];
 
@@ -339,27 +341,27 @@ default :
         while ((getchar()) != '\n');
         getchar();
         return;
-        }
+}
         //通过用户名和密码查看用户表中是否有该用户
-        sprintf(sql,"select id_ from users where name_='%s';",ope.name);
+sprintf(sql,"select id_ from users where name_='%s';",ope.name);
         executesql(sql);
         g_res = mysql_store_result(g_conn);
         iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
         int iNum_fields = mysql_num_fields(g_res);
         //将该用户id取出来备用
         while((g_row=mysql_fetch_row(g_res))) {
-        sprintf(ID,"%s",g_row[0]);
-        }
+sprintf(ID,"%s",g_row[0]);
+}
         //没有查到
-        if(iNum_rows == 0) {
-        puts("No such person!");
+if(iNum_rows == 0) {
+puts("No such person!");
         puts("!!! enter right choice !!! ");
         while ((getchar()) != '\n');
         getchar();
-        }
+}
         //进入改选择
-        else {
-        system("clear");
+else {
+system("clear");
         puts("!!!    alt_msg    !!! ");
         puts("!!!  1:change  name   !!! ");
         puts("!!!  2:change passwd  !!! ");
@@ -370,21 +372,21 @@ default :
         switch(o)
         {
         case 1: system("clear");
-        puts("!!!    alt_msg    !!! ");
+puts("!!!    alt_msg    !!! ");
         printf("!!!    enter name: ");scanf("%s",ope.name);
         //更新用户名
         sprintf(sql,"update users set name_='%s' where id_=%s;",ope.name,ID);
         executesql(sql);
         break;
         case 2: system("clear");
-        puts("!!!    del_alt_msg    !!! ");
+puts("!!!    del_alt_msg    !!! ");
         printf("!!!    enter password: ");scanf("%s",ope.passwd);
         //更新密码
         sprintf(sql,"update users set password_='%s' where id_=%s;",ope.passwd,ID);
         executesql(sql);
         break;
         case 3: system("clear");
-        puts("!!!    alt_msg    !!! ");
+puts("!!!    alt_msg    !!! ");
         puts("!!!      1.ADMINISTRITOR       !!! ");
         puts("!!!      2.HEALTH CARE PROVIDER      !!! ");
         puts("!!!      3.INSURANCE COMPANY   !!! ");
@@ -394,26 +396,26 @@ default :
         {
         case 1: //设置角色为admin
         sprintf(sql,"update userRole set role_id_=2 where user_id_=%s;",ID);
-        executesql(sql);
+executesql(sql);
         break;
         case 2: //设置角色为doctor
         sprintf(sql,"update userRole set role_id_=3 where user_id_=%s;",ID);
-        executesql(sql);
+executesql(sql);
         break;
         case 3: //设置角色insurace
         sprintf(sql,"update userRole set role_id_=4 where user_id_=%s;",ID);
-        executesql(sql);
+executesql(sql);
         break;
         case 4: //设置角色为patient
         sprintf(sql,"update userRole set role_id_=5 where user_id_=%s;",ID);
-        executesql(sql);
+executesql(sql);
         break;
 default: puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
+while ((getchar()) != '\n');
         getchar();
-        }
+}
 
-        break;
+break;
         case 4:
         system("clear");
         puts("!!!    del_alt_msg    !!! ");
@@ -436,18 +438,18 @@ default :
         puts("!!! enter right choice !!! ");
         while ((getchar()) != '\n');
         getchar();
-        }
+}
 
-        puts("!!! success !!! ");
+puts("!!! success !!! ");
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
         getchar();
-        }
+}
         }
 
 //删函数
-        void delete_msg() {
-        int o,op;
+void delete_msg() {
+int o,op;
         char p;
         char d_id[20];
         char ID[20];
@@ -463,27 +465,27 @@ default :
         while ((getchar()) != '\n');
         getchar();
         return;
-        }
+}
         //通过用户名和密码查看用户表中是否有该用户
-        sprintf(sql,"select id_ from users where id_='%s';",d_id);
+sprintf(sql,"select id_ from users where id_='%s';",d_id);
         executesql(sql);
         g_res = mysql_store_result(g_conn);
         iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
         int iNum_fields = mysql_num_fields(g_res);
         //将该用户id取出来备用
         while((g_row=mysql_fetch_row(g_res))) {
-        sprintf(ID,"%s",g_row[0]);
-        }
+sprintf(ID,"%s",g_row[0]);
+}
         //没有查到
-        if(iNum_rows == 0) {
-        puts("No such person!");
+if(iNum_rows == 0) {
+puts("No such person!");
         puts("!!! enter right choice !!! ");
         while ((getchar()) != '\n');
         getchar();
-        }
+}
 
-        else {
-        system("clear");
+else {
+system("clear");
         puts("!!!    delete_msg    !!! ");
         printf("!!!    sure delete? (Y/N):");scanf("%s",&p);
         switch(p)
@@ -491,19 +493,19 @@ default :
         case 'Y': case 'y':
         //需要先删除用户角色表当中的信息，才可删除用户表中的信息
         sprintf(sql,"delete from userRole where user_id_=%s;",ID);
-        executesql(sql);
+executesql(sql);
         sprintf(sql,"delete from users where id_=%s;",ID);
         executesql(sql);
         break;
         case 'N': case 'n':
         return;
-        }
+}
         }
         }
 
 //show self information
-        void show_msg() {
-        sprintf(sql,"select * from users where name_='%s' and password_='%s';",login.name,login.password);
+        void show_self() {
+sprintf(sql,"select * from users where name_='%s' and password_='%s';",login.name,login.password);
         executesql(sql);
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res); // 得到记录的行数
@@ -517,11 +519,11 @@ default :
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
         getchar();
-        }
+}
 
 //alter self information
         void alter_self() {
-        int o,op;
+int o,op;
         char p;
         char ID[20];
 
@@ -533,23 +535,23 @@ default :
         //将该用户id取出来备用
         while((g_row=mysql_fetch_row(g_res))){
         sprintf(ID,"%s",g_row[0]);
-        }
+}
 
-        system("clear");
+system("clear");
         puts("!!!    alter_msg    !!! ");
         puts("!!!  1:change  name   !!! ");
         puts("!!!  2:change passwd  !!! ");
         printf("!!!      choice：     !");scanf("%d",&o);
         switch(o) {
-        case 1: system("clear");
-        puts("!!!    alter_msg    !!! ");
+case 1: system("clear");
+puts("!!!    alter_msg    !!! ");
         printf("!!!    enter name: ");scanf("%s",ope.name);
         //更新用户名
         sprintf(sql,"update users set name_='%s' where id_=%s;",ope.name,ID);
         executesql(sql);
         break;
         case 2: system("clear");
-        puts("!!!    alter_msg    !!! ");
+puts("!!!    alter_msg    !!! ");
         printf("!!!    enter password: ");scanf("%s",ope.passwd);
         //更新密码
         sprintf(sql,"update users set password_='%s' where id_=%s;",ope.passwd,ID);
@@ -557,18 +559,18 @@ default :
         break;
 
 default: puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
+while ((getchar()) != '\n');
         getchar();
-        }
+}
 
-        puts("!!! success !!! ");
+puts("!!! success !!! ");
         mysql_free_result(g_res);
         return;
-        }
+}
 
 
 //显示所有用户及用户角色函数
-        void display() {
+void display() {
 //可以执行
         //查询users表
         sprintf(sql,"select * from users;");
@@ -578,22 +580,23 @@ default: puts("!!! enter right choice !!! ");
         int iNum_fields = mysql_num_fields(g_res); // 得到记录的列数
         system("clear");
         puts("!!!      users table   !!! \n");
-        puts("id_  | role_id_ | name_ |password_|    prescription_    |insurance_  ");
+        puts("id_|role_id_ | name_ |password_|    prescription_    |insurance_  ");
         while((g_row=mysql_fetch_row(g_res)))
         printf("%s\t%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4],g_row[5]);
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
         getchar();
-        }
+}
         //操作菜单
-        void menu() {
-        role_id();
+void menu() {
+role_id();
         printf("id is : %d",id);
         switch(id)
         {
 //root
-        case 1: {   flag=1;
-        while(i)
+        case 1: {
+        flag=1;
+while(i)
         {
         int choice;
         system("clear");
@@ -603,27 +606,29 @@ default: puts("!!! enter right choice !!! ");
         puts("!!! 3:alter msg !!! ");
         puts("!!! 4:delete msg !!! ");
         puts("!!! 5:display all !!! ");
-        puts("!!! 6:exit  login !!! ");
+        puts("!!! 6:show  self information !!! ");
+        puts("!!! 7:alter self information !!! ");
+        puts("!!! 8:exit  login !!! ");
         puts("!!! 0:exit system !!! ");
         scanf("%d",&choice);
         switch(choice)
         {
         case 1: query_msg();
-
-        break;
+break;
         case 2: add_msg();
-
-        break;
+break;
         case 3: alter_msg();
-
-        break;
+break;
         case 4: delete_msg();
-
-        break;
+break;
         case 5: display();
-
-        break;
-        case 6:
+break;
+        case 6: show_self();
+break;
+        case 7: alter_self();
+flag = 0;
+        return;
+        case 8: //退出登录
         flag = 0;
 //管理员权限开关
         return;
@@ -632,16 +637,16 @@ default: puts("!!! enter right choice !!! ");
         i = 0;
         break;
 default: puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
+while ((getchar()) != '\n');
         getchar();
         break;
-        }
+}
         }
         }
 
 //admin
         case 2: {
-        flag=1;
+flag=1;
         while(i)
         {
         int choice;
@@ -652,27 +657,29 @@ default: puts("!!! enter right choice !!! ");
         puts("!!! 3:alter msg !!! ");
         puts("!!! 4:delete msg !!! ");
         puts("!!! 5:display all !!! ");
-        puts("!!! 6:exit  login !!! ");
+        puts("!!! 6:show  self information !!! ");
+        puts("!!! 7:alter self information !!! ");
+        puts("!!! 8:exit  login !!! ");
         puts("!!! 0:exit system !!! ");
         scanf("%d",&choice);
         switch(choice)
         {
         case 1: query_msg();
-
-        break;
+break;
         case 2: add_msg();
-
-        break;
+break;
         case 3: alter_msg();
-
-        break;
+break;
         case 4: delete_msg();
-
-        break;
+break;
         case 5: display();
-
-        break;
-        case 6: //退出登录
+break;
+        case 6: show_self();
+break;
+        case 7: alter_self();
+flag = 0;
+        return;
+        case 8: //退出登录
         flag = 0;
 //管理员权限开关
         return;
@@ -681,16 +688,16 @@ default: puts("!!! enter right choice !!! ");
         i = 0;
         break;
 default: puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
+while ((getchar()) != '\n');
         getchar();
         break;
-        }
+}
         }
         }
 
 //doctor
         case 3: {
-        flag =1;
+flag =1;
         while(i)
         {
         int choice;
@@ -701,27 +708,29 @@ default: puts("!!! enter right choice !!! ");
         puts("!!! 3:alter msg !!! ");
         puts("!!! 4:delete msg !!! ");
         puts("!!! 5:display all !!! ");
-        puts("!!! 6:exit  login !!! ");
+        puts("!!! 6:show  self information !!! ");
+        puts("!!! 7:alter self information !!! ");
+        puts("!!! 8:exit  login !!! ");
         puts("!!! 0:exit system !!! ");
         scanf("%d",&choice);
         switch(choice)
         {
         case 1: query_msg();
-
-        break;
+break;
         case 2: add_msg();
-
-        break;
+break;
         case 3: alter_msg();
-
-        break;
+break;
         case 4: delete_msg();
-
-        break;
+break;
         case 5: display();
-
-        break;
-        case 6: //退出登录
+break;
+        case 6: show_self();
+break;
+        case 7: alter_self();
+flag = 0;
+        return;
+        case 8: //退出登录
         flag = 0;
 //管理员权限开关
         return;
@@ -730,34 +739,39 @@ default: puts("!!! enter right choice !!! ");
         i = 0;
         break;
 default: puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
+while ((getchar()) != '\n');
         getchar();
         break;
-        }
+}
         }
         }
 
 //insurance company
         case 4: {
-        while(i)
+while(i)
         {
         int choice;
         system("clear");
         puts("!!!     choice：  !!! ");
-        puts("!!! 1:query   msg !!! ");
-        puts("!!! 2:alter msg !!! ");
-        puts("!!! 3:exit  login !!! ");
+        puts("!!! 1:query  patient !!! ");
+        puts("!!! 2:alter patient !!! ");
+        puts("!!! 3:show  self information !!! ");
+        puts("!!! 4:alter self information !!! ");
+        puts("!!! 5:exit  login !!! ");
         puts("!!! 0:exit system !!! ");
         scanf("%d",&choice);
         switch(choice)
         {
         case 1: query_msg();
-
-        break;
+break;
         case 2: alter_msg();
-
-        break;
-        case 3: //退出登录
+break;
+        case 3: show_self();
+break;
+        case 4: alter_self();
+flag = 0;
+        return;
+        case 5: //退出登录
         flag = 0;
 //管理员权限开关
         return;
@@ -766,34 +780,33 @@ default: puts("!!! enter right choice !!! ");
         i = 0;
         break;
 default: puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
+while ((getchar()) != '\n');
         getchar();
         break;
-        }
+}
         }
         }
 
 //patient
         case 5: {
-        while(i)
+while(i)
         {
         int choice;
         system("clear");
         puts("!!!     choice：  !!! ");
-        puts("!!! 1:show  information !!! ");
-        puts("!!! 2:alter information !!! ");
+        puts("!!! 1:show  self information !!! ");
+        puts("!!! 2:alter self information !!! ");
         puts("!!! 3:exit  login !!! ");
         puts("!!! 0:exit system !!! ");
         scanf("%d",&choice);
         switch(choice)
         {
-        case 1: show_msg();
-
-        break;
+        case 1: show_self();
+break;
         case 2: alter_self();
-
-        flag = 0;
+flag = 0;
         return;
+        
         case 3: //退出登录
         flag = 0;
 //管理员权限开关
@@ -803,23 +816,23 @@ default: puts("!!! enter right choice !!! ");
         i = 0;
         break;
 default: puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
+while ((getchar()) != '\n');
         getchar();
         break;
-        }
+}
         }
         }
 
 default :
         puts("!!! role id error !!! ");
-        }
+}
         }
 
 
 
 //主函数
-        int main(void) {
-        while(i)
+int main(void) {
+while(i)
         {
         puts("!!!The system is initializing!!!");
         //初始化链接
@@ -833,8 +846,8 @@ default :
         user_login();
         //操作菜单
         menu();
-        }
+}
         // 关闭链接
-        mysql_close(g_conn);
+mysql_close(g_conn);
         return EXIT_SUCCESS;
-        }
+}
