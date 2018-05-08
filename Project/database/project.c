@@ -27,7 +27,6 @@
         char Time[MAX_BUF_SIZE];
 
         int iNum_rows = 0;//mysql语句执行结果返回行数赋初值
-        int flag = 0;//管理员权限开关
         int i = 1;//系统运行开关
         int id = 0;//role id
 //登录使用的结构体
@@ -114,7 +113,7 @@
         {
         puts("Init Administrtor User");
         //插入管理员用户
-        sprintf(sql,"insert into users values(1,1,'root','123','n/a');");
+        sprintf(sql,"insert into users values(1,1,'admin','123','n/a');");
         executesql(sql);
         }
         mysql_free_result(g_res); // 释放结果集
@@ -201,8 +200,7 @@
         target_id=2;
         if(strcmp(g_row[0],"3")==0)
         target_id=3;
-        if(strcmp(g_row[0],"4")==0)
-        target_id=4;
+
 
         if(id < target_id)
         {
@@ -277,8 +275,10 @@ default :
 
 //添加函数
         void add_msg() {
-        char ID[20];
-        //可以执行
+        char u_id[20];
+        int o;
+        if(id == 1)
+        {
         system("clear");
         puts("!!!    Add_user   !!! ");
         //根据当前已有用户的行数判断，新建的用户id应为行数+1
@@ -295,18 +295,65 @@ default :
         iNum_rows = mysql_num_rows(g_res);
         int iNum_fields = mysql_num_fields(g_res);
         while((g_row=mysql_fetch_row(g_res))){
-        sprintf(ID,"%s",g_row[0]);
+        sprintf(u_id,"%s",g_row[0]);
         }
         //备注
         printf("  Prescription：");scanf("%s",ope.prescription);
         //role
-        printf(" ROLE:\n2: ADMINISTRITOR\n3: HEALTHY CARE PROVIDER\n4: PATIENT\n");scanf("%d",&ope.role);
+        printf(" ROLE:\n1: HEALTHY CARE PROVIDER\n2: PATIENT\n");scanf("%d",&o);
+        switch(o)
+        {
+        case 1:
+        ope.role=2;
+        break;
+        case 2:
+        ope.role=3;
+        break;
+        default:
+        puts("!!! enter right choice !!! ");
+
+        while ((getchar()) != '\n');
+        getchar();
+        }
         //向用户表中插入一个新的用户的信息
         sprintf(sql,"insert into users values(%d,%d,'%s','%s','%s');",i,ope.role,ope.name,ope.passwd,ope.prescription);
         executesql(sql);
         puts("!!! success !!! ");
         while ((getchar()) != '\n');
         getchar();
+        }
+        else
+        {
+        system("clear");
+        puts("!!!    Add_user   !!! ");
+        //根据当前已有用户的行数判断，新建的用户id应为行数+1
+        sprintf(sql,"select id_ from users;");
+        executesql(sql);
+        g_res = mysql_store_result(g_conn);
+        iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
+        int i = iNum_rows + 1;//新用户id
+        //输入账户和密码
+        printf("    Name：");scanf("%s",ope.name);
+        printf("Password：");scanf("%s",ope.passwd);
+        executesql(sql);
+        g_res = mysql_store_result(g_conn);
+        iNum_rows = mysql_num_rows(g_res);
+        int iNum_fields = mysql_num_fields(g_res);
+        while((g_row=mysql_fetch_row(g_res))){
+        sprintf(u_id,"%s",g_row[0]);
+        }
+        //备注
+        printf("  Prescription：");scanf("%s",ope.prescription);
+        //role
+        ope.role=3;
+        //向用户表中插入一个新的用户的信息
+        sprintf(sql,"insert into users values(%d,%d,'%s','%s','%s');",i,ope.role,ope.name,ope.passwd,ope.prescription);
+        executesql(sql);
+        puts("!!! success !!! ");
+        while ((getchar()) != '\n');
+        getchar();
+        }
+
 
         }
 
@@ -421,10 +468,8 @@ default :
 
 //删函数
         void delete_msg() {
-        int o,op;
         char p;
         char u_id[20];
-        char ID[20];
 
         system("clear");
         puts("!!!   enter id !!! ");
@@ -438,15 +483,6 @@ default :
         return ;
         }
 
-        sprintf(sql,"select id_ from users where id_='%s';",u_id);
-        executesql(sql);
-        g_res = mysql_store_result(g_conn);
-        iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
-        int iNum_fields = mysql_num_fields(g_res);
-        //将该用户id取出来备用
-        while((g_row=mysql_fetch_row(g_res))) {
-        sprintf(ID,"%s",g_row[0]);
-        }
         system("clear");
         puts("!!!    delete_msg    !!! ");
         printf("!!!    sure delete? (Y/N):");scanf("%s",&p);
@@ -454,7 +490,7 @@ default :
         {
         case 'Y': case 'y':
         //需要先删除用户角色表当中的信息，才可删除用户表中的信息
-        sprintf(sql,"delete from users where id_=%s;",ID);
+        sprintf(sql,"delete from users where id_=%s;",u_id);
         executesql(sql);
         break;
         case 'N': case 'n':
@@ -482,9 +518,8 @@ default :
 
 //alter self information
         void alter_self() {
-        int o,op;
-        char p;
-        char ID[20];
+        int o;
+        char u_id[20];
 
         sprintf(sql,"select * from users where name_='%s' and password_='%s';",login.name,login.password);
         executesql(sql);
@@ -493,7 +528,7 @@ default :
         int iNum_fields=mysql_num_fields(g_res);
         //将该用户id取出来备用
         while((g_row=mysql_fetch_row(g_res))){
-        sprintf(ID,"%s",g_row[0]);
+        sprintf(u_id,"%s",g_row[0]);
         }
 
         system("clear");
@@ -506,14 +541,14 @@ default :
         puts("!!!    alter_msg    !!! ");
         printf("!!!    enter name: ");scanf("%s",ope.name);
         //更新用户名
-        sprintf(sql,"update users set name_='%s' where id_=%s;",ope.name,ID);
+        sprintf(sql,"update users set name_='%s' where id_=%s;",ope.name,u_id);
         executesql(sql);
         break;
         case 2: system("clear");
         puts("!!!    alter_msg    !!! ");
         printf("!!!    enter password: ");scanf("%s",ope.passwd);
         //更新密码
-        sprintf(sql,"update users set password_='%s' where id_=%s;",ope.passwd,ID);
+        sprintf(sql,"update users set password_='%s' where id_=%s;",ope.passwd,u_id);
         executesql(sql);
         break;
 
@@ -552,65 +587,8 @@ default: puts("!!! enter right choice !!! ");
         printf("id is : %d",id);
         switch(id)
         {
-//root
-        case 1: {
-        flag=1;
-        while(i)
-        {
-        int choice;
-        system("clear");
-        puts("!!!     choice：  !!! ");
-        puts("!!! 1:query  user !!! ");
-        puts("!!! 2:add  user !!! ");
-        puts("!!! 3:alter user !!! ");
-        puts("!!! 4:delete user !!! ");
-        puts("!!! 5:display all !!! ");
-        puts("!!! 6:show  self information !!! ");
-        puts("!!! 7:alter self information !!! ");
-        puts("!!! 8:exit  login !!! ");
-        puts("!!! 0:exit system !!! ");
-        scanf("%d",&choice);
-        switch(choice)
-        {
-        case 1: query_msg();
-
-        break;
-        case 2: add_msg();
-
-        break;
-        case 3: alter_msg();
-
-        break;
-        case 4: delete_msg();
-
-        break;
-        case 5: display();
-
-        break;
-        case 6: show_self();
-        break;
-        case 7: alter_self();
-        flag = 0;
-        return;
-        case 8: //退出登录
-        flag = 0;
-//管理员权限开关
-        return;
-        case 0: puts("!!! thank you for using !!! ");
-//退出系统
-        i = 0;
-        break;
-default: puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
-        getchar();
-        break;
-        }
-        }
-        }
-
 //admin
-        case 2: {
-        flag=1;
+        case 1: {
         while(i)
         {
         int choice;
@@ -646,11 +624,8 @@ default: puts("!!! enter right choice !!! ");
         case 6: show_self();
         break;
         case 7: alter_self();
-        flag = 0;
         return;
         case 8: //退出登录
-        flag = 0;
-//管理员权限开关
         return;
         case 0: puts("!!! thank you for using !!! ");
 //退出系统
@@ -663,10 +638,10 @@ default: puts("!!! enter right choice !!! ");
         }
         }
         }
+
 
 //doctor
-        case 3: {
-        flag =1;
+        case 2: {
         while(i)
         {
         int choice;
@@ -676,10 +651,9 @@ default: puts("!!! enter right choice !!! ");
         puts("!!! 2:add  patient !!! ");
         puts("!!! 3:alter patient !!! ");
         puts("!!! 4:delete paitent !!! ");
-        puts("!!! 5:display all !!! ");
-        puts("!!! 6:show  self information !!! ");
-        puts("!!! 7:alter self information !!! ");
-        puts("!!! 8:exit  login !!! ");
+        puts("!!! 5:show  self information !!! ");
+        puts("!!! 6:alter self information !!! ");
+        puts("!!! 7:exit  login !!! ");
         puts("!!! 0:exit system !!! ");
         scanf("%d",&choice);
         switch(choice)
@@ -696,16 +670,11 @@ default: puts("!!! enter right choice !!! ");
         case 4: delete_msg();
 
         break;
-        case 5: display();
-
+        case 5: show_self();
         break;
-        case 6: show_self();
-        break;
-        case 7: alter_self();
-        flag = 0;
+        case 6: alter_self();
         return;
-        case 8: //退出登录
-        flag = 0;
+        case 7: //退出登录
 //管理员权限开关
         return;
         case 0: puts("!!! thank you for using !!! ");
@@ -722,7 +691,7 @@ default: puts("!!! enter right choice !!! ");
 
 
 //patient
-        case 4: {
+        case 3: {
         while(i)
         {
         int choice;
@@ -742,7 +711,6 @@ default: puts("!!! enter right choice !!! ");
         return;
 
         case 3: //退出登录
-        flag = 0;
 //管理员权限开关
         return;
         case 0: puts("!!! thank you for using !!! ");
