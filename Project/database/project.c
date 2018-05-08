@@ -322,7 +322,7 @@ default :
         puts("!!!     delete_msg  !!! ");
         printf("    ID：");scanf("%s",u_id);
         //判断要进行删改的用户是不是管理员用户，禁止对管理员用户进行删改操作
-        if(strcmp(d_id,"1") == 0)
+        if(strcmp(u_id,"1") == 0)
         {
         puts("ROOT user deletion is prohibited");
         while ((getchar()) != '\n');
