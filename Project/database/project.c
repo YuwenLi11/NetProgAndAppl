@@ -176,12 +176,12 @@
 
 
 //judge target user role_id
-        int judge(char user_id[20])
+        int judge(char u_id[20])
         {
         int target_id;
 
         //通过当前登录用户的id查询这个用户的角色id
-        sprintf(sql,"select role_id_ from users where id_='%s';",user_id);
+        sprintf(sql,"select role_id_ from users where id_='%s';",u_id);
         executesql(sql);
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res);
@@ -222,7 +222,7 @@
         void query_msg() {
 
         int choice;
-        char t_id[20];
+        char u_id[20];
 
         while(1){
         system("clear");
@@ -236,9 +236,9 @@
         case 1:
         system("clear");
         puts("!!!   enter id !!! ");
-        printf("id：");scanf("%s",t_id);
+        printf("id：");scanf("%s",u_id);
         //在指定表中查询用户名相关信息
-        if(judge(t_id) == 0){
+        if(judge(u_id) == 0){
         puts("!!!Insufficient permissions!!! ");
         while ((getchar()) != '\n');
         getchar();
@@ -277,9 +277,6 @@ default :
 
 //添加函数
         void add_msg() {
-        int o;
-        char ID[20];
-        //通过权限判定函数的返回值决定是否可以进行添加用户操作
 
         //可以执行
         system("clear");
@@ -302,8 +299,6 @@ default :
         }
         //备注
         printf("  Prescription：");scanf("%s",ope.prescription);
-        //insurance
-        printf(" Insurance Status: ");scanf("%s",ope.insurance);
         //role
         printf(" ROLE:\n2: ADMINISTRITOR\n3: HEALTHY CARE PROVIDER\n4: PATIENT\n");scanf("%d",&ope.role);
         //向用户表中插入一个新的用户的信息
@@ -316,19 +311,18 @@ default :
         }
 
 
-        
+
 //改函数
         void alter_msg() {
         int o,op;
         char p;
         char ID[20];
 
-        //可以执行
         system("clear");
-        puts("!!!     alter_msg  !!! ");
-        printf("    Name：");scanf("%s",ope.name);
+        puts("!!!     delete_msg  !!! ");
+        printf("    ID：");scanf("%s",d_id);
         //判断要进行删改的用户是不是管理员用户，禁止对管理员用户进行删改操作
-        if(strcmp(ope.name,"root") == 0)
+        if(strcmp(d_id,"1") == 0)
         {
         puts("ROOT user deletion is prohibited");
         while ((getchar()) != '\n');
@@ -429,23 +423,22 @@ default :
         void delete_msg() {
         int o,op;
         char p;
-        char d_id[20];
+        char u_id[20];
         char ID[20];
-
-        //可以执行
+        
         system("clear");
-        puts("!!!     delete_msg  !!! ");
-        printf("    ID：");scanf("%s",d_id);
-        //判断要进行删改的用户是不是管理员用户，禁止对管理员用户进行删改操作
-        if(strcmp(d_id,"1") == 0)
-        {
-        puts("ROOT user deletion is prohibited");
+        puts("!!!   enter id !!! ");
+        printf("id：");scanf("%s",u_id);
+        //在指定表中查询用户名相关信息
+        if(judge(u_id) == 0){
+        puts("!!!Insufficient permissions!!! ");
         while ((getchar()) != '\n');
         getchar();
-        return;
+        //权限不够，退出函数
+        return ;
         }
-        //通过用户名和密码查看用户表中是否有该用户
-        sprintf(sql,"select id_ from users where id_='%s';",d_id);
+
+        sprintf(sql,"select id_ from users where id_='%s';",u_id);
         executesql(sql);
         g_res = mysql_store_result(g_conn);
         iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
@@ -454,15 +447,6 @@ default :
         while((g_row=mysql_fetch_row(g_res))) {
         sprintf(ID,"%s",g_row[0]);
         }
-        //没有查到
-        if(iNum_rows == 0) {
-        puts("No such person!");
-        puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
-        getchar();
-        }
-
-        else {
         system("clear");
         puts("!!!    delete_msg    !!! ");
         printf("!!!    sure delete? (Y/N):");scanf("%s",&p);
@@ -475,7 +459,6 @@ default :
         break;
         case 'N': case 'n':
         return;
-        }
         }
         }
 
@@ -577,10 +560,10 @@ default: puts("!!! enter right choice !!! ");
         int choice;
         system("clear");
         puts("!!!     choice：  !!! ");
-        puts("!!! 1:query   msg !!! ");
+        puts("!!! 1:query  user !!! ");
         puts("!!! 2:add  user !!! ");
-        puts("!!! 3:alter msg !!! ");
-        puts("!!! 4:delete msg !!! ");
+        puts("!!! 3:alter user !!! ");
+        puts("!!! 4:delete user !!! ");
         puts("!!! 5:display all !!! ");
         puts("!!! 6:show  self information !!! ");
         puts("!!! 7:alter self information !!! ");
@@ -633,10 +616,10 @@ default: puts("!!! enter right choice !!! ");
         int choice;
         system("clear");
         puts("!!!     choice：  !!! ");
-        puts("!!! 1:query   msg !!! ");
+        puts("!!! 1:query  user !!! ");
         puts("!!! 2:add  user !!! ");
-        puts("!!! 3:alter msg !!! ");
-        puts("!!! 4:delete msg !!! ");
+        puts("!!! 3:alter user !!! ");
+        puts("!!! 4:delete user !!! ");
         puts("!!! 5:display all !!! ");
         puts("!!! 6:show  self information !!! ");
         puts("!!! 7:alter self information !!! ");
@@ -689,10 +672,10 @@ default: puts("!!! enter right choice !!! ");
         int choice;
         system("clear");
         puts("!!!     choice：  !!! ");
-        puts("!!! 1:query   msg !!! ");
-        puts("!!! 2:add  user !!! ");
-        puts("!!! 3:alter msg !!! ");
-        puts("!!! 4:delete msg !!! ");
+        puts("!!! 1:query patient !!! ");
+        puts("!!! 2:add  patient !!! ");
+        puts("!!! 3:alter patient !!! ");
+        puts("!!! 4:delete paitent !!! ");
         puts("!!! 5:display all !!! ");
         puts("!!! 6:show  self information !!! ");
         puts("!!! 7:alter self information !!! ");
@@ -736,7 +719,7 @@ default: puts("!!! enter right choice !!! ");
         }
         }
         }
-        
+
 
 //patient
         case 4: {
