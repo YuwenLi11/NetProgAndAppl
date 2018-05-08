@@ -242,8 +242,10 @@
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res);
         if(iNum_rows == 0)
+        {
         mysql_free_result(g_res);
         return 0;
+        }
         else
         {
         iNum_fields=mysql_num_fields(g_res);
