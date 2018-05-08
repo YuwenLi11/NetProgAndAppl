@@ -245,7 +245,7 @@
         //权限不够，退出函数
         return ;
         }
-        sprintf(sql,"select * from users where id_='%s';",t_id);
+        sprintf(sql,"select * from users where id_='%s';",u_id);
         executesql(sql);
         g_res = mysql_store_result(g_conn);
         iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
@@ -277,7 +277,7 @@ default :
 
 //添加函数
         void add_msg() {
-
+        char ID[20];
         //可以执行
         system("clear");
         puts("!!!    Add_user   !!! ");
@@ -317,10 +317,10 @@ default :
         int o,op;
         char p;
         char ID[20];
-
+        char u_id[20];
         system("clear");
         puts("!!!     delete_msg  !!! ");
-        printf("    ID：");scanf("%s",d_id);
+        printf("    ID：");scanf("%s",u_id);
         //判断要进行删改的用户是不是管理员用户，禁止对管理员用户进行删改操作
         if(strcmp(d_id,"1") == 0)
         {
@@ -425,7 +425,7 @@ default :
         char p;
         char u_id[20];
         char ID[20];
-        
+
         system("clear");
         puts("!!!   enter id !!! ");
         printf("id：");scanf("%s",u_id);
