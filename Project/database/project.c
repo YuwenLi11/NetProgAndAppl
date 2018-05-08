@@ -632,7 +632,7 @@ void menu()
     switch(id)
         {
         case 1:
-        {
+        {   flag=1;
             while(i)
             {
             int choice;
@@ -682,6 +682,7 @@ void menu()
 
         case 2:
         {
+            flag=1;
         while(i)
         {
         int choice;
@@ -730,7 +731,7 @@ void menu()
         }
 
         case 3:
-        {
+        {flag =1;
         while(i)
         {
         int choice;
