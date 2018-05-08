@@ -181,33 +181,109 @@ void get_response(char *res, char *client_header) {
         printf("Couldn't find %s\n", COOKIE_USER_ID);
     }
 
+    // Separate request_route
+    char routes[16][32];
+    int route_count = get_restful_route(request_route, routes);
+
     // Determine response file path
-    char file_path[64], buffer[1024];
-    if (strlen(request_route) == 1 &&
-            compare_str(request_route, 0, "/", 0, 1) == 0) { // root
-        sprintf(file_path, "%s/index.html", HTML_FOLDER);
-    } else if (compare_str(request_route, 0, "/login", 0, 6) == 0) { // login
-        char id[16], passwd[16];
-        get_from_two_str(client_header, "id=", "&", id);
-        get_from_two_str(client_header, "passwd=", "", passwd);
-        if (DBG) printf("In login, id=%s, passwd=%s\n", id, passwd);
-        login(id, passwd, res);
-        return;
-    } else if (compare_str(request_route, 0, "/logout", 0, 7) == 0) { // logout
-        logout(res);
-        return;
+    if (strcmp(method, "GET") == 0) {
+        printf("GET: %s\n", request_route);
+
+        if (strcmp(routes[0], "api") == 0) {
+            if (strcmp(routes[1], "member") == 0) {
+                if (strcmp(routes[2], "get") == 0) {
+                    if (strcmp(routes[3], "id") == 0) {
+                        if (route_count == 5) { // id: fifth param
+                            printf("[Action] /api/member/get/id : %s\n", routes[4]);
+                        } else {
+                            // no id or more param
+                        }
+                    } else if (strcmp(routes[3], "all") == 0 && route_count == 4) {
+                        printf("[Action] /api/member/get/all\n");
+                    } else if (strcmp(routes[3], "admin") == 0 && route_count == 4) {
+                        printf("[Action] /api/member/get/admin\n");
+                    } else if (strcmp(routes[3], "doctor") == 0 && route_count == 4) {
+                        printf("[Action] /api/member/get/doctor\n");
+                    } else if (strcmp(routes[3], "patient") == 0 && route_count == 4) {
+                        printf("[Action] /api/member/get/patient\n");
+                    }
+                } else {
+                    // /api/member/?
+                }
+            } else if (strcmp(routes[1], "prescription") == 0) {
+                  
+            } else {
+                // /api/?
+            }
+        } else {
+            // /?
+        }
+    } else if(strcmp(method, "POST") == 0) {
+        printf("POST: %s\n", request_route);
+
+        if (strcmp(routes[0], "api") == 0) {
+            if (strcmp(routes[1], "member") == 0) {
+                if (strcmp(routes[2], "add") == 0 && route_count == 3) {
+                    printf("[Action] /api/member/add\n");
+                } else if (strcmp(routes[2], "edit") == 0 && route_count == 3) {
+                    printf("[Action] /api/member/edit\n");
+                } else if (strcmp(routes[2], "delete") == 0 && route_count == 3) {
+                    printf("[Action] /api/member/delete\n");
+                } else {
+                    // /api/member/?
+                }
+            } else if (strcmp(routes[1], "login") == 0) {
+                printf("[Action] Login\n");
+            } else if (strcmp(routes[1], "logout") == 0) {
+                printf("[Action] Logout\n");
+            } else if (strcmp(routes[1], "prescription") == 0) {
+                if (strcmp(routes[2], "add") == 0 && route_count == 3) {
+                    printf("[Action] /api/prescription/add\n");
+                } else if (strcmp(routes[2], "edit") == 0 && route_count == 3) {
+                    printf("[Action] /api/prescription/edit\n");
+                } else if (strcmp(routes[2], "delete") == 0 && route_count == 3) {
+                    printf("[Action] /api/prescription/delete\n");
+                } else {
+                    // /api/prescription/?
+                }
+            } else {
+                // /api/?
+            }
+        } else {
+            // /?
+      }
     } else {
-        sprintf(file_path, "%s%s", HTML_FOLDER, request_route);
+        printf("Mehtod \"%s\" is unrecognizable\n", method);
+
+
     }
 
-    // load file
-    if (load_file_to_buffer(file_path, buffer) == -1) { // err
-      strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
-    } else { // get file successfully
-      strcpy(res, "HTTP/1.1 200 OK\r\n");
-      strcat(res, buffer);
-      strcat(res, "\r\n");
-    }
+    // char file_path[64], buffer[1024];
+    // if (strlen(request_route) == 1 &&
+    //         compare_str(request_route, 0, "/", 0, 1) == 0) { // root
+    //     sprintf(file_path, "%s/index.html", HTML_FOLDER);
+    // } else if (compare_str(request_route, 0, "/login", 0, 6) == 0) { // login
+    //     char id[16], passwd[16];
+    //     get_from_two_str(client_header, "id=", "&", id);
+    //     get_from_two_str(client_header, "passwd=", "", passwd);
+    //     if (DBG) printf("In login, id=%s, passwd=%s\n", id, passwd);
+    //     login(id, passwd, res);
+    //     return;
+    // } else if (compare_str(request_route, 0, "/logout", 0, 7) == 0) { // logout
+    //     logout(res);
+    //     return;
+    // } else {
+    //     sprintf(file_path, "%s%s", HTML_FOLDER, request_route);
+    // }
+    //
+    // // load file
+    // if (load_file_to_buffer(file_path, buffer) == -1) { // err
+    //   strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
+    // } else { // get file successfully
+    //   strcpy(res, "HTTP/1.1 200 OK\r\n");
+    //   strcat(res, buffer);
+    //   strcat(res, "\r\n");
+    // }
 }
 
 /************************************************************
