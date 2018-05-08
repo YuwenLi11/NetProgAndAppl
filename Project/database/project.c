@@ -365,42 +365,33 @@ default :
         char p;
         char ID[20];
         char u_id[20];
+
         system("clear");
-        puts("!!!     delete_msg  !!! ");
-        printf("    ID：");scanf("%s",u_id);
-        //判断要进行删改的用户是不是管理员用户，禁止对管理员用户进行删改操作
-        if(strcmp(u_id,"1") == 0)
-        {
-        puts("ROOT user deletion is prohibited");
+        puts("!!!   enter id !!! ");
+        printf("id：");scanf("%s",u_id);
+        //在指定表中查询用户名相关信息
+        if(judge(u_id) == 0){
+        puts("!!!Insufficient permissions!!! ");
         while ((getchar()) != '\n');
         getchar();
-        return;
+        //权限不够，退出函数
+        return ;
         }
-        //通过用户名和密码查看用户表中是否有该用户
-        sprintf(sql,"select id_ from users where name_='%s';",ope.name);
+
+        sprintf(sql,"select id_ from users where id_='%s';",u_id);
         executesql(sql);
         g_res = mysql_store_result(g_conn);
         iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
         int iNum_fields = mysql_num_fields(g_res);
-        //将该用户id取出来备用
-        while((g_row=mysql_fetch_row(g_res))) {
+        while((g_row=mysql_fetch_row(g_res))){
         sprintf(ID,"%s",g_row[0]);
         }
-        //没有查到
-        if(iNum_rows == 0) {
-        puts("No such person!");
-        puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
-        getchar();
-        }
-        //进入改选择
-        else {
+        if (id ==1) {
         system("clear");
         puts("!!!    alt_msg    !!! ");
         puts("!!!  1:change  name   !!! ");
         puts("!!!  2:change passwd  !!! ");
         puts("!!!  3:change  role   !!! ");
-        puts("!!!  4:change prescription  !!! ");
         printf("!!!      choice：     !");scanf("%d",&o);
         switch(o)
         {
@@ -444,26 +435,28 @@ default: puts("!!! enter right choice !!! ");
         }
 
         break;
-        case 4:
-        system("clear");
-        puts("!!!    del_alt_msg    !!! ");
-        printf("!!!    enter prescription: ");scanf("%s",ope.prescription);
-        //更新备注
-        sprintf(sql,"update users set description_='%s' where id_=%s;",ope.prescription,ID);
-        executesql(sql);
-        break;
 
 default :
         puts("!!! enter right choice !!! ");
         while ((getchar()) != '\n');
         getchar();
         }
-
+        }
+        
+        else 
+        {
+        system("clear");
+        puts("!!!  change prescription  !!! ");
+        printf("!!!    enter prescription: ");scanf("%s",ope.prescription);
+        //更新备注
+        sprintf(sql,"update users set description_='%s' where id_=%s;",ope.prescription,ID);
+        executesql(sql);
+        }
+        
         puts("!!! success !!! ");
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
         getchar();
-        }
         }
 
 //删函数
@@ -658,7 +651,7 @@ default: puts("!!! enter right choice !!! ");
         puts("!!!     choice：  !!! ");
         puts("!!! 1:query patient !!! ");
         puts("!!! 2:add  patient !!! ");
-        puts("!!! 3:alter patient !!! ");
+        puts("!!! 3:alter patient's prescription !!! ");
         puts("!!! 4:delete paitent !!! ");
         puts("!!! 5:show  self information !!! ");
         puts("!!! 6:alter self information !!! ");
@@ -760,4 +753,3 @@ default :
         mysql_close(g_conn);
         return EXIT_SUCCESS;
         }
-
