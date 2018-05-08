@@ -292,7 +292,7 @@
         scanf("%d",&choice);
         switch(choice)
         {
-        case 1: sprintf(ope.tables,"users");
+        case 1:
         system("clear");
         puts("!!!   enter id !!! ");
         printf("id：");scanf("%s",t_id);
