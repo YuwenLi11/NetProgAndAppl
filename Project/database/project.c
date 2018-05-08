@@ -226,10 +226,10 @@
 
 
 //judge target user role_id
-        int judge(char user_name)
+        int judge(char user_id[20])
         {
         int target_id;
-        sprintf(sql,"select id_ from users where id_='%s';",user_name);
+        sprintf(sql,"select id_ from users where id_='%s';",user_id);
         executesql(sql);
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res);
@@ -398,12 +398,12 @@ default: puts("!!! enter right choice !!! ");
         sprintf(sql,"insert into userRole values(%d,%s);",i,g_row[0]);
         executesql(sql);
         }
-        }
-        
         puts("!!! success !!! ");
         while ((getchar()) != '\n');
         getchar();
+
         }
+
 
 
 //改函数
