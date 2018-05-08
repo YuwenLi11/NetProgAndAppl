@@ -393,11 +393,11 @@
         switch(op)
         {
         case 1: //设置角色为doctor
-        sprintf(sql,"update users set role_id_=1 where id_=%s;",ID);
+        sprintf(sql,"update users set role_id_=2 where id_=%s;",ID);
         executesql(sql);
         break;
         case 2: //设置角色为patient
-        sprintf(sql,"update users set role_id_=2 where id_=%s;",ID);
+        sprintf(sql,"update users set role_id_=3 where id_=%s;",ID);
         executesql(sql);
         break;
 default: puts("!!! enter right choice !!! ");
