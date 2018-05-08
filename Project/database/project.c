@@ -739,25 +739,25 @@ void menu()
 }
 
 
-/* 主函数 */
+/* main*/
 int main( void )
 {
 	while ( i )
 	{
 		puts( "!!!The system is initializing!!!" );
-		/* 初始化链接 */
+		/* initial mysql */
 		if ( init_mysql() )
 			print_mysql_error( NULL );
 		create_database();
 		create_table();
-		/* 初始化管理员账户 */
+		/* intial admin */
 		init_Administrtor();
-		/* 用户登录 */
+		/* login */
 		user_login();
-		/* 操作菜单 */
+		/* memu */
 		menu();
 	}
-	/* 关闭链接 */
+	/* close connection */
 	mysql_close( g_conn );
 	return(EXIT_SUCCESS);
 }
