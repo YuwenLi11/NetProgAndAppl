@@ -675,7 +675,6 @@ default: puts("!!! enter right choice !!! ");
         case 6: alter_self();
         return;
         case 7: //退出登录
-//管理员权限开关
         return;
         case 0: puts("!!! thank you for using !!! ");
 //退出系统
@@ -707,7 +706,6 @@ default: puts("!!! enter right choice !!! ");
         case 1: show_self();
         break;
         case 2: alter_self();
-        flag = 0;
         return;
 
         case 3: //退出登录
