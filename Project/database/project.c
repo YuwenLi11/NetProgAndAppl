@@ -297,7 +297,7 @@
         puts("!!!Insufficient permissions!!! ");
         while ((getchar()) != '\n');
         getchar();
-        //权限不够，退出函数  
+        //权限不够，退出函数
         return ;
         }
         sprintf(sql,"select id_ from users where id_='%s';",t_id);
@@ -362,8 +362,7 @@ default :
         //向用户表中插入一个新的用户的信息
         sprintf(sql,"insert into users values(%d,'%s','%s','%s','%s');",i,ope.name,ope.passwd,ope.prescription,ope.insurance);
         executesql(sql);
-        //管理员用户设定权限
-        if(flag) {
+
         while(1){
         system("clear");
         puts("!!!    ROLE   !!! ");
@@ -400,13 +399,7 @@ default: puts("!!! enter right choice !!! ");
         executesql(sql);
         }
         }
-        //如果没有管理员权限，默认添加的用户角色为other
-        else {
-        sprintf(sql,"insert into userRole values(%d,3);",i);
-        executesql(sql);
-        }
-
-        flag = 0;//管理员权限开关
+        
         puts("!!! success !!! ");
         while ((getchar()) != '\n');
         getchar();
