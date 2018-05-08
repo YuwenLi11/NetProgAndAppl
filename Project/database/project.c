@@ -469,7 +469,7 @@ default :
 //删函数
         void delete_msg() {
         char p;
-        char u_id[20];
+        char u_id[20],ID[20];
 
         system("clear");
         puts("!!!   enter id !!! ");
@@ -483,6 +483,15 @@ default :
         return ;
         }
 
+        sprintf(sql,"select id_ from users where id_='%s';",u_id);
+        executesql(sql);
+        g_res = mysql_store_result(g_conn);
+        iNum_rows = mysql_num_rows(g_res); // 得到记录的行数  
+        int iNum_fields = mysql_num_fields(g_res);
+        while((g_row=mysql_fetch_row(g_res))){
+        sprintf(ID,"%s",g_row[0]);
+        }
+        
         system("clear");
         puts("!!!    delete_msg    !!! ");
         printf("!!!    sure delete? (Y/N):");scanf("%s",&p);
@@ -490,7 +499,7 @@ default :
         {
         case 'Y': case 'y':
         //需要先删除用户角色表当中的信息，才可删除用户表中的信息
-        sprintf(sql,"delete from users where id_=%s;",u_id);
+        sprintf(sql,"delete * from users where id_=%s;",ID);
         executesql(sql);
         break;
         case 'N': case 'n':
@@ -751,3 +760,4 @@ default :
         mysql_close(g_conn);
         return EXIT_SUCCESS;
         }
+
