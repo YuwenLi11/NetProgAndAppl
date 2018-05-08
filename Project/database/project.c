@@ -1,21 +1,14 @@
-/********************************************************************
-* 标题：C语言链接mysql数据库，实现可以增删改查的角色权限登录系统
-*
-* 描述：本代码可在安装GCC编译环境和mysql集成环境下直接编译运行，根据不同使用者的mysql账户可修改代码前面的内容以成功连接mysql数据库
-* 编译命令：gcc project.c -lmysqlclient -o project
-********************************************************************/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include "mysql/mysql.h"
 
-MYSQL		*g_conn;        /* mysql 链接 */
-MYSQL_RES	*g_res;         /* mysql 记录集 */
-MYSQL_ROW	g_row;          /* 字符串数组，mysql 记录行 */
+MYSQL		*g_conn;        /* mysql connection */
+MYSQL_RES	*g_res;         /* mysql rocord set*/
+MYSQL_ROW	g_row;          /* mysql rocord row*/
 
-#define MAX_BUF_SIZE 1024       /* 缓冲区最大字节数 */
+#define MAX_BUF_SIZE 1024       /* max buffer */
 /*=================================================================*/
 /**/ const char		*g_host_name	= "localhost";
 /**/ const char		*g_user_name	= "root";
@@ -26,24 +19,24 @@ MYSQL_ROW	g_row;          /* 字符串数组，mysql 记录行 */
 char	sql[MAX_BUF_SIZE];
 char	Time[MAX_BUF_SIZE];
 
-int	iNum_rows	= 0;    /* mysql语句执行结果返回行数赋初值 */
-int	i		= 1;    /* 系统运行开关 */
-int	id		= 0;    /* role id */
-/* 登录使用的结构体 */
+int	iNum_rows	= 0;    /* row value aftern execute mysql */
+int	i		= 1;    /* system switch */
+int	id		= 0;    /* role id of user who is using*/
+/* structure for login */
 struct Login {
 	char	name[24];
 	char	password[20];
 } login;
-/* 操作使用的结构体 */
+/* structure for operation */
 struct Operation {
 	char	tables[24];
 	char	name[24];
 	char	passwd[20];
 	int	role;
 	char	prescription[20];
-	char	insurance[20];
 } ope;
-/* 打印错误信息 */
+
+/* handle error message */
 void print_mysql_error( const char *msg )
 {
 	if ( msg )
@@ -53,7 +46,7 @@ void print_mysql_error( const char *msg )
 }
 
 
-/* 执行sql语句，成功返回0，失败返回-1 */
+/* execute mysql，success return 0，fail return -1 */
 int executesql( const char * sql )
 {
 	if ( mysql_real_query( g_conn, sql, strlen( sql ) ) )
@@ -62,22 +55,22 @@ int executesql( const char * sql )
 }
 
 
-/* 初始化链接 */
+/* initial mysql */
 int init_mysql()
 {
 	/* init the database connection */
 	g_conn = mysql_init( NULL );
 	/* connection the database */
 	if ( !mysql_real_connect( g_conn, g_host_name, g_user_name, g_password, g_db_name, g_db_port, NULL, 0 ) )
-		return(-1);     /* 链接失败 */
-	/* 检查是否可以使用 */
+		return(-1);     /* connection failed */
+	/* check if is ok to use */
 	if ( executesql( "set names utf8" ) )
 		return(-1);
-	return(0);              /* 返回成功 */
+	return(0);              /* success */
 }
 
 
-/*选择数据库，没有的时候创建 */
+/*select database, if no such a database,create one */
 void create_database()
 {
 	sprintf( sql, "use project" );
@@ -97,10 +90,10 @@ void create_database()
 }
 
 
-/* 查看表格完整性 */
+/* check the table */
 void create_table()
 {
-	/* users表的检查与创建 */
+	/* check/create user table */
 	sprintf( sql, "show tables;" );
 	executesql( sql );
 	g_res		= mysql_store_result( g_conn );
@@ -111,14 +104,14 @@ void create_table()
 		executesql( "create table users(id_ smallint unsigned primary key auto_increment,role_id_ smallint unsigned,name_ varchar(24) not null unique,password_ char(20) not null,prescription_ varchar(200));" );
 	}
 
-	mysql_free_result( g_res ); /* 释放结果集 */
+	mysql_free_result( g_res ); /* free record */
 }
 
 
-/* 初始化管理员账户 */
+/* initial admin */
 void init_Administrtor()
 {
-/* 查询users表 */
+/* check if there is an admin in user table */
 	sprintf( sql, "select * from users where id_='1' and name_='root';" );
 	executesql( sql );
 	g_res		= mysql_store_result( g_conn );
@@ -126,15 +119,15 @@ void init_Administrtor()
 	if ( iNum_rows == 0 )
 	{
 		puts( "Init Administrtor User" );
-		/* 插入管理员用户 */
+		/* insert admin user */
 		sprintf( sql, "insert into users values(1,1,'admin','123','n/a');" );
 		executesql( sql );
 	}
-	mysql_free_result( g_res ); /* 释放结果集 */
+	mysql_free_result( g_res );
 }
 
 
-/* 用户登录 */
+/* login */
 void user_login()
 {
 	puts( "Init success! Please press any key to continue" );
@@ -144,10 +137,10 @@ void user_login()
 			;
 		system( "clear" );
 		puts( "!!!Login System!!!" );
-		/* 输入账户和密码 */
+		/* user name and passwd */
 		printf( "Name：" ); scanf( "%s", login.name );
 		printf( "Passwd：" ); scanf( "%s", login.password );
-		/* 在数据库中查询，可查询到信息即表明users表中有账号信息，登录成功 */
+		/* check user table if there is the user，login success */
 		sprintf( sql, "select * from users where name_='%s' and password_='%s';", login.name, login.password );
 		executesql( sql );
 		g_res		= mysql_store_result( g_conn );
@@ -166,11 +159,11 @@ void user_login()
 		}
 	}
 
-	mysql_free_result( g_res ); /* 释放结果集 */
+	mysql_free_result( g_res );
 }
 
 
-/* 查询当前用户role_id */
+/* get role_id of the user who is using now*/
 void role_id()
 {
 	sprintf( sql, "select role_id_ from users where name_='%s';", login.name );
@@ -180,16 +173,14 @@ void role_id()
 	int iNum_fields = mysql_num_fields( g_res );
 	while ( (g_row = mysql_fetch_row( g_res ) ) )
 	{
-/* 通过当前用户的角色id查询该用户的权限id */
+/* 1:admin, 2:doctor, 3:patient */
 		if ( strcmp( g_row[0], "1" ) == 0 )
 			id = 1;
 		if ( strcmp( g_row[0], "2" ) == 0 )
 			id = 2;
 		if ( strcmp( g_row[0], "3" ) == 0 )
 			id = 3;
-		if ( strcmp( g_row[0], "4" ) == 0 )
-			id = 4;
-		mysql_free_result( g_res ); /* 释放结果集 */
+		mysql_free_result( g_res );
 	}
 }
 
@@ -199,7 +190,7 @@ int judge( char u_id[20] )
 {
 	int target_id;
 
-	/* 通过当前登录用户的id查询这个用户的角色id */
+	/* select user from user id */
 	sprintf( sql, "select role_id_ from users where id_='%s';", u_id );
 	executesql( sql );
 	g_res		= mysql_store_result( g_conn );
@@ -212,7 +203,7 @@ int judge( char u_id[20] )
 		int iNum_fields = mysql_num_fields( g_res );
 		while ( (g_row = mysql_fetch_row( g_res ) ) )
 		{
-/* 通过当前用户的角色id查询该用户的权限id */
+/* get target user role id */
 			if ( strcmp( g_row[0], "1" ) == 0 )
 				target_id = 1;
 			if ( strcmp( g_row[0], "2" ) == 0 )
@@ -220,44 +211,44 @@ int judge( char u_id[20] )
 			if ( strcmp( g_row[0], "3" ) == 0 )
 				target_id = 3;
 
-
+/* determine the user role id with target user role id */
 			if ( id < target_id )
 			{
-				mysql_free_result( g_res );     /* 释放结果集 */
-				return(1);
+				mysql_free_result( g_res );
+				return(1);//get permission 
 			}else  {
-				mysql_free_result( g_res );     /* 释放结果集 */
-				return(0);
+				mysql_free_result( g_res );
+				return(0);// rejected
 			}
 		}
 	}
 }
 
 
-/* 查询函数 */
+/* query */
 void query_msg()
 {
 	char u_id[20];
 	system( "clear" );
 	puts( "!!!   enter id !!! " );
 	printf( "id：" ); scanf( "%s", u_id );
-	/* 在指定表中查询用户名相关信息 */
+	/* judge the permision */
 	if ( judge( u_id ) == 0 )
 	{
 		puts( "!!!Insufficient permissions!!! " );
 		while ( (getchar() ) != '\n' )
 			;
 		getchar();
-		/* 权限不够，退出函数 */
+		/* rejected */
 		return;
 	}
 	sprintf( sql, "select * from users where id_='%s';", u_id );
 	executesql( sql );
 	g_res		= mysql_store_result( g_conn );
-	iNum_rows	= mysql_num_rows( g_res );      /* 得到记录的行数 */
+	iNum_rows	= mysql_num_rows( g_res ); 
 	system( "clear" );
 
-	int iNum_fields = mysql_num_fields( g_res );    /* 得到记录的列数 */
+	int iNum_fields = mysql_num_fields( g_res );
 	puts( "id_|role_id_ | name_ |password_|    prescription_ " );
 	while ( (g_row = mysql_fetch_row( g_res ) ) )
 		printf( "%s\t%s\t%s\t%s\t\t%s\n", g_row[0], g_row[1], g_row[2], g_row[3], g_row[4] );
@@ -269,22 +260,23 @@ void query_msg()
 }
 
 
-/* 添加函数 */
+/* add */
 void add_msg()
 {
 	char	u_id[20];
 	int	o;
+	//for admin user
 	if ( id == 1 )
 	{
 		system( "clear" );
 		puts( "!!!    Add_user   !!! " );
-		/* 根据当前已有用户的行数判断，新建的用户id应为行数+1 */
+		/* user id each time puls 1 */
 		sprintf( sql, "select id_ from users;" );
 		executesql( sql );
 		g_res		= mysql_store_result( g_conn );
-		iNum_rows	= mysql_num_rows( g_res );      /* 得到记录的行数 */
-		int i = iNum_rows + 1;                          /* 新用户id */
-		/* 输入账户和密码 */
+		iNum_rows	= mysql_num_rows( g_res );
+		int i = iNum_rows + 1;                          /* new id */
+		/* user name and passwd */
 		printf( "    Name：" ); scanf( "%s", ope.name );
 		printf( "Password：" ); scanf( "%s", ope.passwd );
 		executesql( sql );
@@ -295,7 +287,7 @@ void add_msg()
 		{
 			sprintf( u_id, "%s", g_row[0] );
 		}
-		/* 备注 */
+		/* prescription */
 		printf( "  Prescription：" ); scanf( "%s", ope.prescription );
 		/* role */
 		printf( " ROLE:\n1: HEALTHY CARE PROVIDER\n2: PATIENT\n" ); scanf( "%d", &o );
@@ -314,23 +306,23 @@ void add_msg()
 				;
 			getchar();
 		}
-		/* 向用户表中插入一个新的用户的信息 */
+		/* insert a new user */
 		sprintf( sql, "insert into users values(%d,%d,'%s','%s','%s');", i, ope.role, ope.name, ope.passwd, ope.prescription );
 		executesql( sql );
 		puts( "!!! success !!! " );
 		while ( (getchar() ) != '\n' )
 			;
 		getchar();
-	}else  {
+	}
+	//for doctor
+	else  {
 		system( "clear" );
 		puts( "!!!    Add_user   !!! " );
-		/* 根据当前已有用户的行数判断，新建的用户id应为行数+1 */
 		sprintf( sql, "select id_ from users;" );
 		executesql( sql );
 		g_res		= mysql_store_result( g_conn );
-		iNum_rows	= mysql_num_rows( g_res );      /* 得到记录的行数 */
-		int i = iNum_rows + 1;                          /* 新用户id */
-		/* 输入账户和密码 */
+		iNum_rows	= mysql_num_rows( g_res );
+		int i = iNum_rows + 1; 
 		printf( "    Name：" ); scanf( "%s", ope.name );
 		printf( "Password：" ); scanf( "%s", ope.passwd );
 		executesql( sql );
@@ -341,11 +333,9 @@ void add_msg()
 		{
 			sprintf( u_id, "%s", g_row[0] );
 		}
-		/* 备注 */
 		printf( "  Prescription：" ); scanf( "%s", ope.prescription );
-		/* role */
+		/* cannot choose a role, default:add a patient */
 		ope.role = 3;
-		/* 向用户表中插入一个新的用户的信息 */
 		sprintf( sql, "insert into users values(%d,%d,'%s','%s','%s');", i, ope.role, ope.name, ope.passwd, ope.prescription );
 		executesql( sql );
 		puts( "!!! success !!! " );
@@ -356,7 +346,7 @@ void add_msg()
 }
 
 
-/* 改函数 */
+/* alter */
 void alter_msg()
 {
 	int	o, op;
@@ -367,26 +357,27 @@ void alter_msg()
 	system( "clear" );
 	puts( "!!!   enter id !!! " );
 	printf( "id：" ); scanf( "%s", u_id );
-	/* 在指定表中查询用户名相关信息 */
+	/* judge permission */
 	if ( judge( u_id ) == 0 )
 	{
 		puts( "!!!Insufficient permissions!!! " );
 		while ( (getchar() ) != '\n' )
 			;
 		getchar();
-		/* 权限不够，退出函数 */
+		/* rejected */
 		return;
 	}
 
 	sprintf( sql, "select id_ from users where id_='%s';", u_id );
 	executesql( sql );
 	g_res		= mysql_store_result( g_conn );
-	iNum_rows	= mysql_num_rows( g_res ); /* 得到记录的行数 */
+	iNum_rows	= mysql_num_rows( g_res );
 	int iNum_fields = mysql_num_fields( g_res );
 	while ( (g_row = mysql_fetch_row( g_res ) ) )
 	{
 		sprintf( ID, "%s", g_row[0] );
 	}
+	//for admin user
 	if ( id == 1 )
 	{
 		system( "clear" );
@@ -400,14 +391,14 @@ void alter_msg()
 		case 1: system( "clear" );
 			puts( "!!!    alt_msg    !!! " );
 			printf( "!!!    enter name: " ); scanf( "%s", ope.name );
-			/* 更新用户名 */
+			/* renew user name */
 			sprintf( sql, "update users set name_='%s' where id_=%s;", ope.name, ID );
 			executesql( sql );
 			break;
 		case 2: system( "clear" );
 			puts( "!!!    del_alt_msg    !!! " );
 			printf( "!!!    enter password: " ); scanf( "%s", ope.passwd );
-			/* 更新密码 */
+			/* renew paddwd */
 			sprintf( sql, "update users set password_='%s' where id_=%s;", ope.passwd, ID );
 			executesql( sql );
 			break;
@@ -418,11 +409,11 @@ void alter_msg()
 			printf( "!!!      choice：     !" ); scanf( "%d", &op );
 			switch ( op )
 			{
-			case 1: /* 设置角色为doctor */
+			case 1: /* set role to be a doctor */
 				sprintf( sql, "update users set role_id_=2 where id_=%s;", ID );
 				executesql( sql );
 				break;
-			case 2: /* 设置角色为patient */
+			case 2: /* set role to be a patient */
 				sprintf( sql, "update users set role_id_=3 where id_=%s;", ID );
 				executesql( sql );
 				break;
@@ -440,11 +431,13 @@ void alter_msg()
 				;
 			getchar();
 		}
-	}else  {
+	}
+	//for doctor user
+	else  {
 		system( "clear" );
 		puts( "!!!  change prescription  !!! " );
 		printf( "!!!    enter prescription: " ); scanf( "%s", ope.prescription );
-		/* 更新备注 */
+		/* renew presecription */
 		sprintf( sql, "update users set prescription_='%s' where id_=%s;", ope.prescription, ID );
 		executesql( sql );
 	}
@@ -457,7 +450,7 @@ void alter_msg()
 }
 
 
-/*删函数 */
+/*delete */
 void delete_msg()
 {
 	char	p;
@@ -466,21 +459,21 @@ void delete_msg()
 	system( "clear" );
 	puts( "!!!   enter id !!! " );
 	printf( "id：" ); scanf( "%s", u_id );
-	/* 在指定表中查询用户名相关信息 */
+	/* judge permission */
 	if ( judge( u_id ) == 0 )
 	{
 		puts( "!!!Insufficient permissions!!! " );
 		while ( (getchar() ) != '\n' )
 			;
 		getchar();
-		/* 权限不够，退出函数 */
+		/* rejected */
 		return;
 	}
 
 	sprintf( sql, "select id_ from users where id_='%s';", u_id );
 	executesql( sql );
 	g_res		= mysql_store_result( g_conn );
-	iNum_rows	= mysql_num_rows( g_res ); /* 得到记录的行数 */
+	iNum_rows	= mysql_num_rows( g_res );
 	int iNum_fields = mysql_num_fields( g_res );
 	while ( (g_row = mysql_fetch_row( g_res ) ) )
 	{
@@ -493,7 +486,7 @@ void delete_msg()
 	switch ( p )
 	{
 	case 'Y': case 'y':
-		/* 需要先删除用户角色表当中的信息，才可删除用户表中的信息 */
+		/* delete the user by id */
 		sprintf( sql, "delete from users where id_=%s;", ID );
 		executesql( sql );
 		break;
@@ -505,13 +498,13 @@ void delete_msg()
 
 /* show self information */
 void show_self()
-{
+{	/* get self by login name and passwd */
 	sprintf( sql, "select * from users where name_='%s' and password_='%s';", login.name, login.password );
 	executesql( sql );
 	g_res		= mysql_store_result( g_conn );
-	iNum_rows	= mysql_num_rows( g_res ); /* 得到记录的行数 */
+	iNum_rows	= mysql_num_rows( g_res );
 	int iNum_fields = mysql_num_fields( g_res );
-	/* 将该用户id取出来备用 */
+
 	system( "clear" );
 	puts( "!!!  personal information  !!! \n" );
 	puts( "id_|role_id_ | name_ |password_|    prescription_ " );
@@ -533,9 +526,8 @@ void alter_self()
 	sprintf( sql, "select * from users where name_='%s' and password_='%s';", login.name, login.password );
 	executesql( sql );
 	g_res		= mysql_store_result( g_conn );
-	iNum_rows	= mysql_num_rows( g_res ); /* 得到记录的行数 */
+	iNum_rows	= mysql_num_rows( g_res );
 	int iNum_fields = mysql_num_fields( g_res );
-	/* 将该用户id取出来备用 */
 	while ( (g_row = mysql_fetch_row( g_res ) ) )
 	{
 		sprintf( u_id, "%s", g_row[0] );
@@ -551,14 +543,14 @@ void alter_self()
 	case 1: system( "clear" );
 		puts( "!!!    alter_msg    !!! " );
 		printf( "!!!    enter name: " ); scanf( "%s", ope.name );
-		/* 更新用户名 */
+		/* renew user name */
 		sprintf( sql, "update users set name_='%s' where id_=%s;", ope.name, u_id );
 		executesql( sql );
 		break;
 	case 2: system( "clear" );
 		puts( "!!!    alter_msg    !!! " );
 		printf( "!!!    enter password: " ); scanf( "%s", ope.passwd );
-		/* 更新密码 */
+		/* renew passwd */
 		sprintf( sql, "update users set password_='%s' where id_=%s;", ope.passwd, u_id );
 		executesql( sql );
 		break;
@@ -575,16 +567,15 @@ void alter_self()
 }
 
 
-/* 显示所有用户及用户角色函数 */
+/* display */
 void display()
 {
-/* 可以执行 */
-	/* 查询users表 */
+//for admin to get all users'information
 	sprintf( sql, "select * from users;" );
 	executesql( sql );
 	g_res		= mysql_store_result( g_conn );
-	iNum_rows	= mysql_num_rows( g_res );      /* 得到记录的行数 */
-	int iNum_fields = mysql_num_fields( g_res );    /* 得到记录的列数 */
+	iNum_rows	= mysql_num_rows( g_res );
+	int iNum_fields = mysql_num_fields( g_res );
 	system( "clear" );
 	puts( "!!!      users table   !!! \n" );
 	puts( "id_|role_id_ | name_ |password_|    prescription_ " );
@@ -597,7 +588,7 @@ void display()
 }
 
 
-/* 操作菜单 */
+/* menu */
 void menu()
 {
 	role_id();
@@ -642,10 +633,9 @@ void menu()
 				break;
 			case 7: alter_self();
 				return;
-			case 8:         /* 退出登录 */
+			case 8: 
 				return;
 			case 0: puts( "!!! thank you for using !!! " );
-/* 退出系统 */
 				i = 0;
 				break;
 			default: puts( "!!! enter right choice !!! " );
@@ -692,10 +682,10 @@ void menu()
 				break;
 			case 6: alter_self();
 				return;
-			case 7:         /* 退出登录 */
+			case 7:  
 				return;
 			case 0: puts( "!!! thank you for using !!! " );
-/* 退出系统 */
+
 				i = 0;
 				break;
 			default: puts( "!!! enter right choice !!! " );
@@ -727,11 +717,11 @@ void menu()
 			case 2: alter_self();
 				return;
 
-			case 3:         /* 退出登录 */
-/* 管理员权限开关 */
+			case 3:
+
 				return;
 			case 0: puts( "!!! thank you for using !!! " );
-/* 退出系统 */
+
 				i = 0;
 				break;
 			default: puts( "!!! enter right choice !!! " );
