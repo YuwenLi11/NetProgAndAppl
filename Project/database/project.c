@@ -98,12 +98,8 @@
         if(iNum_rows == 0)
         {
         puts("create users table");
-        executesql("create table users(id_ smallint unsigned primary key auto_increment,name_ varchar(24) not null unique,password_ char(20) not null,prescription_ varchar(200),insurance_ varchar(200));");
-        puts("create roles table");
-        executesql("create table roles(id_ smallint unsigned primary key auto_increment,name_ varchar(24) not null unique,role_ varchar(200));");
-        puts("create userRole table");
-        executesql("create table userRole(user_id_ smallint unsigned,role_id_ smallint unsigned,primary key(user_id_,role_id_),foreign key(user_id_) references users(id_),foreign key(role_id_ ) references roles(id_));");
-        }
+        executesql("create table users(id_ smallint unsigned primary key auto_increment,role_id_ smallint unsigned,name_ varchar(24) not null unique,password_ char(20) not null,prescription_ varchar(200),insurance_ varchar(200));");
+         }
 
         mysql_free_result(g_res); // 释放结果集
         }
@@ -118,45 +114,9 @@
         {
         puts("Init Administrtor User");
         //插入管理员用户
-        sprintf(sql,"insert into users values(1,'root','123','n/a','n/a');");
+        sprintf(sql,"insert into users values(1,1,'root','123','n/a','n/a');");
         executesql(sql);
         }
-
-        mysql_free_result(g_res); // 释放结果集
-        //查询role
-        sprintf(sql,"select * from roles;");
-        executesql(sql);
-        g_res = mysql_store_result(g_conn);
-        iNum_rows = mysql_num_rows(g_res);
-        if(iNum_rows < 3) {
-        puts("Init System Role");
-        //插入系统角色
-        sprintf(sql,"insert into roles values(1,'ROOT','root');");
-        executesql(sql);
-        sprintf(sql,"insert into roles values(2,'ADMINISTRITOR','administritor');");
-        executesql(sql);
-        sprintf(sql,"insert into roles values(3,'HEALTHY CARE PROVIDER','healthy care provider');");
-        executesql(sql);
-        sprintf(sql,"insert into roles values(4,'INSURANCE COMPANY','insurance company');");
-        executesql(sql);
-        sprintf(sql,"insert into roles values(5,'PATIENT','patient');");
-        executesql(sql);
-        }
-
-        mysql_free_result(g_res); // 释放结果集
-
-        //查询userRole表
-        sprintf(sql,"select * from userRole where user_id_='1' and role_id_='1';");
-        executesql(sql);
-        g_res = mysql_store_result(g_conn);
-        iNum_rows = mysql_num_rows(g_res);
-        if(iNum_rows == 0) {
-        puts("Init User Role");
-        //插入管理员用户
-        sprintf(sql,"insert into userRole values(1,1);");
-        executesql(sql);
-        }
-
         mysql_free_result(g_res); // 释放结果集
         }
 
@@ -195,19 +155,11 @@
 
 //查询当前用户role_id
         void role_id() {
-        sprintf(sql,"select id_ from users where name_='%s';",login.name);
+        sprintf(sql,"select role_id_ from users where name_='%s';",login.name);
         executesql(sql);
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res);
         int iNum_fields=mysql_num_fields(g_res);
-        while((g_row=mysql_fetch_row(g_res))){
-        //通过当前登录用户的id查询这个用户的角色id
-        sprintf(sql,"select role_id_ from userRole where user_id_='%s';",g_row[0]);
-        }
-        executesql(sql);
-        g_res=mysql_store_result(g_conn);
-        iNum_rows=mysql_num_rows(g_res);
-        iNum_fields=mysql_num_fields(g_res);
         while((g_row=mysql_fetch_row(g_res))) {
 //通过当前用户的角色id查询该用户的权限id
         if(strcmp(g_row[0],"1")==0)
@@ -229,15 +181,9 @@
         int judge(char user_id[20])
         {
         int target_id;
-        sprintf(sql,"select id_ from users where id_='%s';",user_id);
-        executesql(sql);
-        g_res=mysql_store_result(g_conn);
-        iNum_rows=mysql_num_rows(g_res);
-        int iNum_fields=mysql_num_fields(g_res);
-        while((g_row=mysql_fetch_row(g_res))){
+ 
         //通过当前登录用户的id查询这个用户的角色id
-        sprintf(sql,"select role_id_ from userRole where user_id_='%s';",g_row[0]);
-        }
+        sprintf(sql,"select role_id_ from users where user_id_='%s';",user_id));
         executesql(sql);
         g_res=mysql_store_result(g_conn);
         iNum_rows=mysql_num_rows(g_res);
@@ -304,16 +250,16 @@
         //权限不够，退出函数
         return ;
         }
-        sprintf(sql,"select id_ from users where id_='%s';",t_id);
+        sprintf(sql,"select * from users where id_='%s';",t_id);
         executesql(sql);
         g_res = mysql_store_result(g_conn);
         iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
         system("clear");
 
         int iNum_fields = mysql_num_fields(g_res); // 得到记录的列数
-        puts("id_  | name_ |password_| prescription_ |  insurance  ");
+        puts("id_  | role_id_ | name_ |password_|    prescription_    |insurance_  ");
         while((g_row=mysql_fetch_row(g_res)))
-        printf("%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4]);
+        printf("%s\t%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4],g_row[5]);
 
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
@@ -363,45 +309,11 @@ default :
         printf("  Prescription：");scanf("%s",ope.prescription);
         //insurance
         printf(" Insurance Status: ");scanf("%s",ope.insurance);
+        //role
+        printf(" 2: ADMINISTRITOR\n3: HEALTHY CARE PROVIDER\n4: INSURANCE COMPANY\n5: PATIENT");scanf("%d",ope.role);
         //向用户表中插入一个新的用户的信息
-        sprintf(sql,"insert into users values(%d,'%s','%s','%s','%s');",i,ope.name,ope.passwd,ope.prescription,ope.insurance);
+        sprintf(sql,"insert into users values(%d,%d,'%s','%s','%s','%s');",i,ope.role,ope.name,ope.passwd,ope.prescription,ope.insurance);
         executesql(sql);
-
-        while(1){
-        system("clear");
-        puts("!!!    ROLE   !!! ");
-        puts("!!! 2: ADMINISTRITOR   !!! ");
-        puts("!!! 3: HEALTHY CARE PROVIDER !!! ");
-        puts("!!! 4: INSURANCE COMPANY !!! ");
-        puts("!!! 5: PATIENT   !!! ");
-        printf("Choice the Role of user %s：",ope.name);scanf("%d",&o);
-        switch(o){
-        case 2: sprintf(ope.role,"ADMINISTRITOR");
-        break;
-        case 3: sprintf(ope.role,"HEALTHY CARE PROVIDER");
-        break;
-        case 4: sprintf(ope.role,"INSURANCE COMPANY");
-        break;
-        case 5: sprintf(ope.role,"PATIENT");
-        break;
-default: puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
-        getchar();
-        }
-
-        break;
-        }
-        //通过角色名找到角色id
-        sprintf(sql,"select id_ from roles where name_='%s';",ope.role);
-        executesql(sql);
-        g_res = mysql_store_result(g_conn);
-        iNum_rows = mysql_num_rows(g_res);
-        iNum_fields = mysql_num_fields(g_res);
-        while((g_row=mysql_fetch_row(g_res))) {
-//将用户id和角色id写入用户角色表
-        sprintf(sql,"insert into userRole values(%d,%s);",i,g_row[0]);
-        executesql(sql);
-        }
         puts("!!! success !!! ");
         while ((getchar()) != '\n');
         getchar();
@@ -599,9 +511,9 @@ default :
         //将该用户id取出来备用
         system("clear");
         puts("!!!  personal information  !!! \n");
-        puts("id_  | name_ |password_|    prescription_    |insurance_  ");
+        puts("id_  | role_id_ | name_ |password_|    prescription_    |insurance_  ");
         while((g_row=mysql_fetch_row(g_res)))
-        printf("%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4]);
+        printf("%s\t%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4],g_row[5]);
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
         getchar();
@@ -666,29 +578,9 @@ default: puts("!!! enter right choice !!! ");
         int iNum_fields = mysql_num_fields(g_res); // 得到记录的列数
         system("clear");
         puts("!!!      users table   !!! \n");
-        puts("id_  | name_ |password_|    prescription_    |insurance_  ");
+        puts("id_  | role_id_ | name_ |password_|    prescription_    |insurance_  ");
         while((g_row=mysql_fetch_row(g_res)))
-        printf("%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4]);
-        //查询roles表
-        sprintf(sql,"select * from roles;");
-        executesql(sql);
-        g_res = mysql_store_result(g_conn);
-        iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
-        iNum_fields = mysql_num_fields(g_res); // 得到记录的列数
-        puts("\n\n!!!      roles table   !!! \n");
-        puts(" id_  | name_                           | role__      ");
-        while((g_row=mysql_fetch_row(g_res)))
-        printf("%s\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2]);
-        //查询userRole表
-        sprintf(sql,"select * from userRole;");
-        executesql(sql);
-        g_res = mysql_store_result(g_conn);
-        iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
-        iNum_fields = mysql_num_fields(g_res); // 得到记录的列数
-        puts("\n\n!!!    userRole table  !!! \n");
-        puts(" user_id_ | role_id_ ");
-        while((g_row=mysql_fetch_row(g_res)))
-        printf("\t%s\t%s\n",g_row[0],g_row[1]);
+        printf("%s\t%s\t%s\t%s\t\t%s\t\t%s\n",g_row[0],g_row[1],g_row[2],g_row[3],g_row[4],g_row[5]);
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
         getchar();
