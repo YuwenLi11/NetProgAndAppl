@@ -218,20 +218,7 @@
 
         //查询函数
         void query_msg() {
-
-        int choice;
         char u_id[20];
-
-        while(1){
-        system("clear");
-        puts("!!!    Query_msg    !!! ");
-        puts("!!!   choice table  !!! ");
-        puts("!!! 1:    users     !!! ");
-        puts("!!! 0:    Return    !!! ");
-        scanf("%d",&choice);
-        switch(choice)
-        {
-        case 1:
         system("clear");
         puts("!!!   enter id !!! ");
         printf("id：");scanf("%s",u_id);
@@ -257,19 +244,8 @@
         mysql_free_result(g_res);
         while ((getchar()) != '\n');
         getchar();
-        break;
+        }
 
-        case 0:
-        return ;
-
-default :
-        puts("!!! enter right choice !!! ");
-        while ((getchar()) != '\n');
-        getchar();
-        break;
-        }
-        }
-        }
 
 
 
@@ -417,11 +393,11 @@ default :
         switch(op)
         {
         case 1: //设置角色为doctor
-        sprintf(sql,"update users set role_id_=1 where user_id_=%s;",ID);
+        sprintf(sql,"update users set role_id_=1 where id_=%s;",ID);
         executesql(sql);
         break;
         case 2: //设置角色为patient
-        sprintf(sql,"update users set role_id_=2 where user_id_=%s;",ID);
+        sprintf(sql,"update users set role_id_=2 where id_=%s;",ID);
         executesql(sql);
         break;
 default: puts("!!! enter right choice !!! ");
@@ -444,7 +420,7 @@ default :
         puts("!!!  change prescription  !!! ");
         printf("!!!    enter prescription: ");scanf("%s",ope.prescription);
         //更新备注
-        sprintf(sql,"update users set description_='%s' where id_=%s;",ope.prescription,ID);
+        sprintf(sql,"update users set prescription_='%s' where id_=%s;",ope.prescription,ID);
         executesql(sql);
         }
 
