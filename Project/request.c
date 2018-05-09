@@ -33,7 +33,7 @@ int login(char *id, char *passwd, char *res) {
             break;
         case LOGIN_NOT_EXIST:
         case LOGIN_INFO_INCORRECT:
-            sprintf(res, "HTTP/1.1 200 OK\r\nSet-Cookie: %s\"\"\r\n\r\n", COOKIE_USER_ID);
+            sprintf(res, "HTTP/1.1 403 Forbidden\r\nSet-Cookie: %s\"\"\r\n\r\n", COOKIE_USER_ID);
     }
 
     return valid;

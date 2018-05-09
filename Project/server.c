@@ -197,6 +197,7 @@ void get_response(char *res, char *client_header) {
                             printf("[Action] /api/member/get/id : %s\n", routes[4]);
                         } else {
                             // no id or more param
+                            strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
                         }
                     } else if (strcmp(routes[3], "all") == 0 && route_count == 4) {
                         printf("[Action] /api/member/get/all\n");
@@ -209,48 +210,107 @@ void get_response(char *res, char *client_header) {
                     }
                 } else {
                     // /api/member/?
+                    strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
                 }
             } else if (strcmp(routes[1], "prescription") == 0) {
-                  
+              if (strcmp(routes[2], "get") == 0) {
+                  if (strcmp(routes[3], "id") == 0) {
+                      if (route_count == 5) { // id: fifth param
+                          printf("[Action] /api/prescription/get/id : %s\n", routes[4]);
+                      } else {
+                          // no id or more param
+                          strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
+                      }
+                  } else if (strcmp(routes[3], "all") == 0 && route_count == 4) {
+                      printf("[Action] /api/prescription/get/all\n");
+                  } else {
+                      // /api/prescription/get/?
+                      strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
+                  }
+              } else {
+                  // /api/prescription/?
+                  strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
+              }
             } else {
                 // /api/?
+                strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
             }
         } else {
             // /?
+            strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
         }
     } else if(strcmp(method, "POST") == 0) {
         printf("POST: %s\n", request_route);
 
         if (strcmp(routes[0], "api") == 0) {
             if (strcmp(routes[1], "member") == 0) {
+                char id[16], name[32], level[4], birthday[16], description[256];
                 if (strcmp(routes[2], "add") == 0 && route_count == 3) {
                     printf("[Action] /api/member/add\n");
+                    get_json_val_by_key(client_header, "name", name);
+                    get_json_val_by_key(client_header, "level", level);
+                    get_json_val_by_key(client_header, "birthday", birthday);
+                    get_json_val_by_key(client_header, "description", description);
+                    if (DBG) printf("DBG - member add name(%s) level(%s) birthday(%s) description(%s)\n", name, level, birthday, description);
+                    // TODO: DB
                 } else if (strcmp(routes[2], "edit") == 0 && route_count == 3) {
-                    printf("[Action] /api/member/edit\n");
+                    get_json_val_by_key(client_header, "id", id);
+                    printf("[Action] /api/member/edit id:%s\n", id);
+                    get_json_val_by_key(client_header, "name", name);
+                    get_json_val_by_key(client_header, "birthday", birthday);
+                    get_json_val_by_key(client_header, "description", description);
+                    if (DBG) printf("DBG - member edit id(%s) name(%s) birthday(%s) description(%s)\n", id, name, birthday, description);
+                    // TODO: DB
                 } else if (strcmp(routes[2], "delete") == 0 && route_count == 3) {
-                    printf("[Action] /api/member/delete\n");
+                    get_json_val_by_key(client_header, "id", id);
+                    printf("[Action] /api/member/delete id:%s\n", id);
+                    // TODO: DB
                 } else {
                     // /api/member/?
+                    strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
                 }
             } else if (strcmp(routes[1], "login") == 0) {
-                printf("[Action] Login\n");
+                char id[32], passwd[32];
+                get_json_val_by_key(client_header, "id", id);
+                printf("[Action] Login id:%s\n", id);
+                login(id, passwd, res);
             } else if (strcmp(routes[1], "logout") == 0) {
                 printf("[Action] Logout\n");
+                logout(res);
             } else if (strcmp(routes[1], "prescription") == 0) {
+                char id[16], doctor_id[16], patient_id[16], date[16], prescription[256];
                 if (strcmp(routes[2], "add") == 0 && route_count == 3) {
                     printf("[Action] /api/prescription/add\n");
+                    get_json_val_by_key(client_header, "doctor_id", doctor_id);
+                    get_json_val_by_key(client_header, "patient_id", patient_id);
+                    get_json_val_by_key(client_header, "date", date);
+                    get_json_val_by_key(client_header, "prescription", prescription);
+                    if (DBG) printf("DBG - prescription add doctor_id(%s) patient_id(%s) date(%s) prescription(%s)\n", doctor_id, patient_id, date, prescription);
+                    // TODO: DB
                 } else if (strcmp(routes[2], "edit") == 0 && route_count == 3) {
-                    printf("[Action] /api/prescription/edit\n");
+                    get_json_val_by_key(client_header, "id", id);
+                    printf("[Action] /api/prescription/edit id:%s\n", id);
+                    get_json_val_by_key(client_header, "doctor_id", doctor_id);
+                    get_json_val_by_key(client_header, "patient_id", patient_id);
+                    get_json_val_by_key(client_header, "date", date);
+                    get_json_val_by_key(client_header, "prescription", prescription);
+                    if (DBG) printf("DBG - prescription edit id(%s) doctor_id(%s) patient_id(%s) date(%s) prescription(%s)\n", id, doctor_id, patient_id, date, prescription);
+                    // TODO: DB
                 } else if (strcmp(routes[2], "delete") == 0 && route_count == 3) {
-                    printf("[Action] /api/prescription/delete\n");
+                    get_json_val_by_key(client_header, "id", id);
+                    printf("[Action] /api/prescription/delete id:%s\n", id);
+                    // TODO: DB
                 } else {
                     // /api/prescription/?
+                    strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
                 }
             } else {
                 // /api/?
+                strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
             }
         } else {
             // /?
+            strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n"); return;
       }
     } else {
         printf("Mehtod \"%s\" is unrecognizable\n", method);
