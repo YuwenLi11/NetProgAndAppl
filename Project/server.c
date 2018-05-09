@@ -11,7 +11,6 @@
 
 #define BACKLOG 10 // queue length
 #define MAX_HEADER_SIZE 2048
-#define MAX_FILE_SIZE 2048
 #define HTML_FOLDER "html"
 
 #define DBG 1
@@ -344,33 +343,4 @@ void get_response(char *res, char *client_header) {
     //   strcat(res, buffer);
     //   strcat(res, "\r\n");
     // }
-}
-
-/************************************************************
- * Function: load_file_to_buffer
- *   Read file by a given name
- * Parameters:
- *   file_name - file name, in the same path that server is executed
- *   buffer - the buffer that file content will put into
- * Returns:
- *   >= 0 - file size
- *   -1 - error
- ************************************************************/
-int load_file_to_buffer(char *file_name, char *buffer) {
-    FILE *file;
-
-    file = fopen(file_name, "rb");
-    if (!file) {
-        printf("Couldn't find %s\n", file_name);
-        return -1;
-    }
-
-    fread(buffer, MAX_FILE_SIZE, 1, file);
-    fseek(file, 0L, SEEK_END); // in order to find file size
-    int file_size = ftell(file);
-
-    printf("Server read %s, size %d bytes\n", file_name, file_size);
-
-    fclose(file);
-    return file_size;
 }

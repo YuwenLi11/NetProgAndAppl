@@ -10,7 +10,9 @@
 #define COOKIE_USER_ID "HcsUserId="
 #define COOKIE_USER_LEVEL "HcsUserLevel="
 
+int get_member_by_id(char *id, char *dst_json);
 int login(char *id, char *passwd, char *res);
 void logout(char *res);
+int load_file_to_buffer(char *file_name, char *buffer);
 
 #endif

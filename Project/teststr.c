@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "strfunc.h"
+#include "request.h"
 
 int main() {
     char dst[128] = {0};
@@ -63,6 +64,12 @@ int main() {
     printf("dump json test\n");
     get_json_val_by_key(src6, "abc", dst6);
     printf("Result for abc is - %s\n", dst6);
+
+    // test request
+    char dst7[2048];
+    printf("get_member_by_id test\n");
+    get_member_by_id("001", dst7);
+    printf("json file: %s\n", dst7);
 
     return 0;
 }
