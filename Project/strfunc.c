@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "strfunc.h"
+#include "jsmn.h"
 
 /************************************************************
  * Function: compare_str
@@ -190,4 +191,61 @@ int get_from_two_str(char *src, char *str1, char *str2, char *dst) {
     // assign string to dst
     strcpy_with_pos_len(src, content_start, start2 - content_start, dst);
     return 1;
+}
+
+
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+		return 0;
+	}
+	return -1;
+}
+
+/************************************************************
+ * Function: get_json_val_by_key
+ *   Get val by key from a json in a header
+ * Parameters:
+ *   header - client header string
+ *   key - json key
+ *   dst - json val to be put
+ * Returns:
+ *   0 - not found
+ *   1 - found
+ ************************************************************/
+int get_json_val_by_key(char *header, char *key, char *dst) {
+    char json_str_buf[1024], json_str[1024];
+    int errcode = get_from_two_str(header, "{", "}", json_str_buf);
+    if (errcode == 0) return 0; // not found json format string
+    sprintf(json_str, "{%s}", json_str_buf);
+
+    int i;
+    int r;
+    jsmn_parser p;
+    jsmntok_t t[128]; // We expect no more than 128 tokens
+
+    jsmn_init(&p);
+    r = jsmn_parse(&p, json_str, strlen(json_str), t, sizeof(t)/sizeof(t[0]));
+    if (r < 0) {
+        printf("Failed to parse JSON: %d\n", r);
+        return 0;
+    }
+
+    // Assume the top-level element is an object
+    if (r < 1 || t[0].type != JSMN_OBJECT) {
+        printf("Object expected\n");
+        return 0;
+    }
+
+    // find key
+    for (i = 1; i < r; i++) {
+    		if (jsoneq(json_str, &t[i], key) == 0) {
+      			/* We may use strndup() to fetch string value */
+      			sprintf(dst, "%.*s", t[i+1].end-t[i+1].start,
+      					json_str + t[i+1].start);
+      			return 1;
+    		}
+  	}
+
+    return 0; // successful
 }

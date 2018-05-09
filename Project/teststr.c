@@ -57,5 +57,12 @@ int main() {
         printf("restful_count %d: %s\n", i, dst5[i]);
     }
 
+    // dump json
+    char *src6 = "xxxx{\"abc\": \"123\", \"cde\": 2}xxxx";
+    char dst6[64];
+    printf("dump json test\n");
+    get_json_val_by_key(src6, "abc", dst6);
+    printf("Result for abc is - %s\n", dst6);
+
     return 0;
 }
