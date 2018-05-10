@@ -339,11 +339,19 @@ void get_response(char *res, char *client_header) {
                     get_json_val_by_key(client_header, "date", date);
                     get_json_val_by_key(client_header, "prescription", prescription);
                     if (DBG) printf("DBG - prescription edit id(%s) doctor_id(%s) patient_id(%s) date(%s) prescription(%s)\n", id, doctor_id, patient_id, date, prescription);
-                    // TODO: DB
+
+                    // Fetch data
+                    int success = edit_prescription(id, doctor_id, patient_id, date, prescription);
+                    if (success) sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": true}\r\n");
+                    else sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": false}\r\n");
                 } else if (strcmp(routes[2], "delete") == 0 && route_count == 3) {
                     get_json_val_by_key(client_header, "id", id);
                     printf("[Action] /api/prescription/delete id:%s\n", id);
-                    // TODO: DB
+
+                    // Fetch data
+                    int success = delete_prescription(id);
+                    if (success) sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": true}\r\n");
+                    else sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": false}\r\n");
                 } else {
                     // /api/prescription/?
                     strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");

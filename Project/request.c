@@ -294,7 +294,11 @@ int add_prescription(char *doctor_id, char *patient_id, char *date, char *prescr
     int member_line_count = get_lines(member_lines, prescription_file);
 
     // find max id
-    int max_id = atoi(member_lines[member_line_count - 5]);
+    int max_id = 1;
+    int i;
+    for (i = 0; i < member_line_count; i += 5) {
+        if (atoi(member_lines[i]) > max_id) max_id = atoi(member_lines[i]);
+    }
 
     sprintf(member_lines[member_line_count], "%d", max_id + 1);
     strcpy(member_lines[member_line_count + 1], doctor_id);
@@ -309,9 +313,48 @@ int add_prescription(char *doctor_id, char *patient_id, char *date, char *prescr
 
 }
 
-int edit_prescription(char *id, char *doctor_id, char *patient_id, char *date, char *prescription);
+int edit_prescription(char *id, char *doctor_id, char *patient_id, char *date, char *prescription) {
+    char member_lines[256][128];
+    int member_line_count = get_lines(member_lines, prescription_file);
 
-int delete_prescription(char *id);
+    int i;
+    for (i = 0; i < member_line_count; i += 5) {
+        if (strcmp(id, member_lines[i]) == 0) {
+            strcpy(member_lines[i + 1], doctor_id);
+            strcpy(member_lines[i + 2], patient_id);
+            strcpy(member_lines[i + 3], date);
+            strcpy(member_lines[i + 4], prescription);
+            save_lines(member_lines, member_line_count, prescription_file);
+            return 1;
+        }
+    }
+
+    return 0; // not found
+}
+
+int delete_prescription(char *id) {
+  char member_lines[256][128];
+  int member_line_count = get_lines(member_lines, prescription_file);
+
+  int i;
+  for (i = 0; i < member_line_count; i += 5) {
+      if (strcmp(id, member_lines[i]) == 0) {
+        if (i + 5 < member_line_count) { // not the last 5 lines
+            // replace the last 5 lines to these 5 lines
+            strcpy(member_lines[i], member_lines[member_line_count - 5]);
+            strcpy(member_lines[i + 1], member_lines[member_line_count - 4]);
+            strcpy(member_lines[i + 2], member_lines[member_line_count - 3]);
+            strcpy(member_lines[i + 3], member_lines[member_line_count - 2]);
+            strcpy(member_lines[i + 4], member_lines[member_line_count - 1]);
+        }
+
+        save_lines(member_lines, member_line_count - 5, prescription_file);
+        return 1;
+    }
+  }
+
+  return 0; // not found
+}
 
 int login(char *id, char *passwd, char *res) {
     // validation

@@ -8,13 +8,18 @@ userb
 usera
 2018/03/05
 this is the prescription 2
-5
-userb
-usera
-2018/03/04
-this is the prescription
+10
+xxx
+ooo
+2018/03/22
+txaaiption
 6
 userb
 usera
 2018/03/04
 this is the prescription
+7
+xxx
+ooo
+2018/03/22
+txaaiption
