@@ -7,12 +7,13 @@
 #define REQ_DBG 1
 #define MAX_FILE_SIZE 2048
 #define member_file "member.txt"
+#define prescription_file "prescription.txt"
 
 /*
  *  Member format
- *  5 lines represents 1 member
+ *  6 lines represents 1 member
  *  Each line in order is id, passwd, name, level, birthday, description
- *  Ex: user.txt
+ *  Ex: member.txt
  *      nick0212\n
  *      123456
  *      Nick\n
@@ -22,10 +23,10 @@
  */
 
 // return line_count
-int get_member_lines(char member_lines[][128]) {
-    FILE *file = fopen(member_file, "r");
+int get_lines(char member_lines[][128], char *file_name) {
+    FILE *file = fopen(file_name, "r");
     if (!file) {
-        printf("Couldn't find %s\n", member_file);
+        printf("Couldn't find %s\n", file_name);
         return -1;
     }
 
@@ -43,10 +44,10 @@ int get_member_lines(char member_lines[][128]) {
     return line_count;
 }
 
-void save_member_lines(char member_lines[][128], int member_line_count) {
-    FILE *file = fopen(member_file, "w");
+void save_lines(char member_lines[][128], int member_line_count, char *file_name) {
+    FILE *file = fopen(file_name, "w");
     if (!file) {
-        printf("Couldn't find %s\n", member_file);
+        printf("Couldn't find %s\n", file_name);
         return;
     }
 
@@ -59,7 +60,7 @@ void save_member_lines(char member_lines[][128], int member_line_count) {
 
 int get_member_by_id(char *id, char *dst_json) {
     char member_lines[256][128];
-    int member_line_count = get_member_lines(member_lines);
+    int member_line_count = get_lines(member_lines, member_file);
 
     int i;
     for (i = 0; i < member_line_count; i += 6) {
@@ -75,7 +76,7 @@ int get_member_by_id(char *id, char *dst_json) {
 
 int get_member_all(char *dst_json) {
     char member_lines[256][128];
-    int member_line_count = get_member_lines(member_lines);
+    int member_line_count = get_lines(member_lines, member_file);
 
     if (member_line_count < 6) {
         sprintf(dst_json, "[]");
@@ -102,7 +103,7 @@ int get_member_all(char *dst_json) {
 
 int get_member_template(char *dst_json, char *level) {
     char member_lines_all[256][128];
-    int member_line_count_all = get_member_lines(member_lines_all);
+    int member_line_count_all = get_lines(member_lines_all, member_file);
 
     // Keep level member only
     char member_lines[256][128];
@@ -158,7 +159,7 @@ int get_member_patient(char *dst_json) {
 
 int add_member(char *id, char *passwd, char *name, char *level, char *birthday, char *description) {
     char member_lines[256][128];
-    int member_line_count = get_member_lines(member_lines);
+    int member_line_count = get_lines(member_lines, member_file);
 
     // check user exist
     int exist = 0;
@@ -176,7 +177,7 @@ int add_member(char *id, char *passwd, char *name, char *level, char *birthday, 
         strcpy(member_lines[member_line_count + 5], description);
 
         member_line_count += 6;
-        save_member_lines(member_lines, member_line_count);
+        save_lines(member_lines, member_line_count, member_file);
 
         return 1;
     } else {
@@ -186,7 +187,7 @@ int add_member(char *id, char *passwd, char *name, char *level, char *birthday, 
 
 int edit_member(char *id, char *passwd, char *name, char *level, char *birthday, char *description) {
     char member_lines[256][128];
-    int member_line_count = get_member_lines(member_lines);
+    int member_line_count = get_lines(member_lines, member_file);
 
     // check user exist
     int i;
@@ -199,7 +200,7 @@ int edit_member(char *id, char *passwd, char *name, char *level, char *birthday,
             if (id != NULL && strcmp(birthday, "") != 0) strcpy(member_lines[i + 4], birthday);
             if (id != NULL && strcmp(description, "") != 0) strcpy(member_lines[i + 5], description);
 
-            save_member_lines(member_lines, member_line_count);
+            save_lines(member_lines, member_line_count, member_file);
             return 1;
         }
     }
@@ -209,7 +210,7 @@ int edit_member(char *id, char *passwd, char *name, char *level, char *birthday,
 
 int delete_member(char *id) {
   char member_lines[256][128];
-  int member_line_count = get_member_lines(member_lines);
+  int member_line_count = get_lines(member_lines, member_file);
 
   // check user exist
   int i;
@@ -225,13 +226,27 @@ int delete_member(char *id) {
               strcpy(member_lines[i + 5], member_lines[member_line_count - 1]);
           }
 
-          save_member_lines(member_lines, member_line_count - 6);
+          save_lines(member_lines, member_line_count - 6, member_file);
           return 1;
       }
   }
 
   return 0; // not found
 }
+
+/*
+ *  Prescription format
+ *  5 lines represents 1 member
+ *  Each line in order is id, doctor_id, patient_id, date, prescription
+ *  Ex: prescription.txt
+ *      1\n
+ *      thedoctor\n
+ *      thepatient\n
+ *      2018/05/12\n
+ *      The disease is ...\n
+ */
+
+
 
 int login(char *id, char *passwd, char *res) {
     // validation
