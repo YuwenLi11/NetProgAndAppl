@@ -232,12 +232,19 @@ void get_response(char *res, char *client_header) {
                   if (strcmp(routes[3], "id") == 0) {
                       if (route_count == 5) { // id: fifth param
                           printf("[Action] /api/prescription/get/id : %s\n", routes[4]);
+                          char prescription_info[1024];
+                          int found = get_prescription_by_id(routes[4], prescription_info);
+                          if (found) sprintf(res, "HTTP/1.1 200 OK\r\n\r\n%s\r\n", prescription_info);
+                          else sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{}\r\n");
                       } else {
                           // no id or more param
                           strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
                       }
                   } else if (strcmp(routes[3], "all") == 0 && route_count == 4) {
                       printf("[Action] /api/prescription/get/all\n");
+                      char prescription_info[5120];
+                      get_prescription_all(prescription_info);
+                      sprintf(res, "HTTP/1.1 200 OK\r\n\r\n%s\r\n", prescription_info);
                   } else {
                       // /api/prescription/get/?
                       strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
@@ -318,7 +325,11 @@ void get_response(char *res, char *client_header) {
                     get_json_val_by_key(client_header, "date", date);
                     get_json_val_by_key(client_header, "prescription", prescription);
                     if (DBG) printf("DBG - prescription add doctor_id(%s) patient_id(%s) date(%s) prescription(%s)\n", doctor_id, patient_id, date, prescription);
-                    // TODO: DB
+
+                    // Fetch data
+                    int success = add_prescription(doctor_id, patient_id, date, prescription);
+                    if (success) sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": true}\r\n");
+                    else sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": false}\r\n");
                 } else if (strcmp(routes[2], "edit") == 0 && route_count == 3) {
                     get_json_val_by_key(client_header, "id", id);
                     printf("[Action] /api/prescription/edit id:%s\n", id);

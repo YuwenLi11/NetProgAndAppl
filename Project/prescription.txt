@@ -1,0 +1,20 @@
+1
+userb
+usera
+2018/03/04
+this is the prescription
+2
+userb
+usera
+2018/03/05
+this is the prescription 2
+5
+userb
+usera
+2018/03/04
+this is the prescription
+6
+userb
+usera
+2018/03/04
+this is the prescription

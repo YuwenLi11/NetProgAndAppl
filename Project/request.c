@@ -246,7 +246,72 @@ int delete_member(char *id) {
  *      The disease is ...\n
  */
 
+int get_prescription_by_id(char *id, char *dst_json) {
+    char member_lines[256][128];
+    int member_line_count = get_lines(member_lines, prescription_file);
 
+    int i;
+    for (i = 0; i < member_line_count; i += 5) {
+        if (strcmp(id, member_lines[i]) == 0) {
+            sprintf(dst_json, "{\"id\": \"%s\", \"doctor_id\": \"%s\", \"patient_id\": %s, \"date\": \"%s\", \"prescription\": \"%s\"}",
+            member_lines[i], member_lines[i+1], member_lines[i+2], member_lines[i+3], member_lines[i+4]);
+            return 1;
+        }
+    }
+
+    return 0; // not found
+}
+
+int get_prescription_all(char *dst_json) {
+    char member_lines[256][128];
+    int member_line_count = get_lines(member_lines, prescription_file);
+
+    if (member_line_count < 5) {
+        sprintf(dst_json, "[]");
+        return 0;
+    }
+
+    // Add first
+    sprintf(dst_json, "[\n  {\"id\": \"%s\", \"doctor_id\": \"%s\", \"patient_id\": %s, \"date\": \"%s\", \"prescription\": \"%s\"}",
+    member_lines[0], member_lines[1], member_lines[2], member_lines[3], member_lines[4]);
+
+    int i;
+    for (i = 5; i < member_line_count; i += 5) {
+        char each_member[1024];
+        sprintf(each_member, ",\n  {\"id\": \"%s\", \"doctor_id\": \"%s\", \"patient_id\": %s, \"date\": \"%s\", \"prescription\": \"%s\"}",
+        member_lines[i], member_lines[i+1], member_lines[i+2], member_lines[i+3], member_lines[i+4]);
+
+        strcat(dst_json, each_member);
+    }
+
+    strcat(dst_json, "\n]");
+
+    return 1;
+}
+
+int add_prescription(char *doctor_id, char *patient_id, char *date, char *prescription) {
+    char member_lines[256][128];
+    int member_line_count = get_lines(member_lines, prescription_file);
+
+    // find max id
+    int max_id = atoi(member_lines[member_line_count - 5]);
+
+    sprintf(member_lines[member_line_count], "%d", max_id + 1);
+    strcpy(member_lines[member_line_count + 1], doctor_id);
+    strcpy(member_lines[member_line_count + 2], patient_id);
+    strcpy(member_lines[member_line_count + 3], date);
+    strcpy(member_lines[member_line_count + 4], prescription);
+
+    member_line_count += 5;
+    save_lines(member_lines, member_line_count, prescription_file);
+
+    return 1;
+
+}
+
+int edit_prescription(char *id, char *doctor_id, char *patient_id, char *date, char *prescription);
+
+int delete_prescription(char *id);
 
 int login(char *id, char *passwd, char *res) {
     // validation
