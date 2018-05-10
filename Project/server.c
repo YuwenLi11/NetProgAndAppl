@@ -311,6 +311,7 @@ void get_response(char *res, char *client_header) {
             } else if (strcmp(routes[1], "login") == 0) {
                 char id[32], passwd[32];
                 get_json_val_by_key(client_header, "id", id);
+                get_json_val_by_key(client_header, "passwd", passwd);
                 printf("[Action] Login id:%s\n", id);
                 login(id, passwd, res);
             } else if (strcmp(routes[1], "logout") == 0) {
