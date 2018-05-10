@@ -11,6 +11,10 @@
 #define COOKIE_USER_LEVEL "HcsUserLevel="
 
 int get_member_by_id(char *id, char *dst_json);
+int get_member_all(char *dst_json);
+int get_member_admin(char *dst_json);
+int get_member_doctor(char *dst_json);
+int get_member_patient(char *dst_json);
 int login(char *id, char *passwd, char *res);
 void logout(char *res);
 int load_file_to_buffer(char *file_name, char *buffer);

@@ -6,13 +6,15 @@
 
 #define REQ_DBG 1
 #define MAX_FILE_SIZE 2048
+#define member_file "member.txt"
 
 /*
  *  Member format
  *  5 lines represents 1 member
- *  Each line in order is id, name, level, birthday, description
+ *  Each line in order is id, passwd, name, level, birthday, description
  *  Ex: user.txt
- *      00021\n
+ *      nick0212\n
+ *      123456
  *      Nick\n
  *      2\n
  *      1995/02/12\n
@@ -21,36 +23,30 @@
 
 // return line_count
 int get_member_lines(char member_lines[][128]) {
-  FILE *file;
-  char *line = NULL;
-  size_t len = 0;
-  ssize_t read;
-  char *file_name = "member.txt";
+    FILE *file = fopen(member_file, "r");
+    if (!file) {
+        printf("Couldn't find %s\n", member_file);
+        return -1;
+    }
 
-  int line_count = 0;
+    char *line = NULL;
+    size_t len = 0;
+    int line_count = 0;
 
-  file = fopen(file_name, "r");
-  if (!file) {
-      printf("Couldn't find %s\n", file_name);
-      return -1;
-  }
+    while (getline(&line, &len, file) != -1) {
+        line[strlen(line) - 1] = '\0'; // remove break line
+        strcpy(member_lines[line_count], line);
+        line_count++;
+    }
 
-  while ((read = getline(&line, &len, file)) != -1) {
-      line[strlen(line) - 1] = '\0'; // remove break line
-      strcpy(member_lines[line_count], line);
-      line_count++;
-  }
-
-  return line_count;
-
-  fclose(file);
+    fclose(file);
+    return line_count;
 }
 
 void save_member_lines(char member_lines[][128], int member_line_count) {
-    char *file_name = "member2.txt";
-    FILE *file = fopen(file_name, "w");
+    FILE *file = fopen(member_file, "w");
     if (!file) {
-        printf("Couldn't find %s\n", file_name);
+        printf("Couldn't find %s\n", member_file);
         return;
     }
 
@@ -58,6 +54,7 @@ void save_member_lines(char member_lines[][128], int member_line_count) {
     for (i = 0; i < member_line_count; i++) {
         fprintf(file, "%s\n", member_lines[i]);
     }
+    fclose(file);
 }
 
 int get_member_by_id(char *id, char *dst_json) {
@@ -65,19 +62,98 @@ int get_member_by_id(char *id, char *dst_json) {
     int member_line_count = get_member_lines(member_lines);
 
     int i;
-    for (i = 0; i < member_line_count; i += 5) {
+    for (i = 0; i < member_line_count; i += 6) {
         if (strcmp(id, member_lines[i]) == 0) { // found
-          sprintf(dst_json, "{\"id\": \"%s\", \"name\": \"%s\", \"level\": %s, \"birthday\": \"%s\", \"description\": \"%s\"}",
-            member_lines[i], member_lines[i+1], member_lines[i+2], member_lines[i+3], member_lines[i+4]);
+            sprintf(dst_json, "{\"id\": \"%s\", \"name\": \"%s\", \"level\": %s, \"birthday\": \"%s\", \"description\": \"%s\"}",
+            member_lines[i], member_lines[i+2], member_lines[i+3], member_lines[i+4], member_lines[i+5]);
             return 1;
         }
     }
 
     return 0; // not found
+}
 
-    // int max_id = atoi(member_lines[member_line_count - 5]);
-    // printf("Max id = %d\n", max_id);
+int get_member_all(char *dst_json) {
+    char member_lines[1024][128];
+    int member_line_count = get_member_lines(member_lines);
 
+    if (member_line_count < 6) {
+        sprintf(dst_json, "[]");
+        return 0;
+    }
+
+    // Add first
+    sprintf(dst_json, "[\n  {\"id\": \"%s\", \"name\": \"%s\", \"level\": %s, \"birthday\": \"%s\", \"description\": \"%s\"}",
+    member_lines[0], member_lines[2], member_lines[3], member_lines[4], member_lines[5]);
+
+    int i;
+    for (i = 6; i < member_line_count; i += 6) {
+        char each_member[1024];
+        sprintf(each_member, ",\n  {\"id\": \"%s\", \"name\": \"%s\", \"level\": %s, \"birthday\": \"%s\", \"description\": \"%s\"}",
+        member_lines[i], member_lines[i+2], member_lines[i+3], member_lines[i+4], member_lines[i+5]);
+
+        strcat(dst_json, each_member);
+    }
+
+    strcat(dst_json, "\n]");
+
+    return 1;
+}
+
+int get_member_template(char *dst_json, char *level) {
+    char member_lines_all[1024][128];
+    int member_line_count_all = get_member_lines(member_lines_all);
+
+    // Keep level member only
+    char member_lines[1024][128];
+    int member_line_count = 0;
+    int j;
+    for (j = 0; j < member_line_count_all; j += 6) {
+        if (strcmp(member_lines_all[j + 3], level) == 0) {
+            int k;
+            for (k = 0; k < 6; k++) {
+                strcpy(member_lines[member_line_count + k], member_lines_all[j + k]);
+            }
+            member_line_count += 6;
+        }
+    }
+
+    if (member_line_count < 6) {
+        sprintf(dst_json, "[]");
+        return 0;
+    }
+
+    // Add first
+    sprintf(dst_json, "[\n  {\"id\": \"%s\", \"name\": \"%s\", \"level\": %s, \"birthday\": \"%s\", \"description\": \"%s\"}",
+    member_lines[0], member_lines[2], member_lines[3], member_lines[4], member_lines[5]);
+
+    int i;
+    for (i = 6; i < member_line_count; i += 6) {
+        char each_member[1024];
+        sprintf(each_member, ",\n  {\"id\": \"%s\", \"name\": \"%s\", \"level\": %s, \"birthday\": \"%s\", \"description\": \"%s\"}",
+        member_lines[i], member_lines[i+2], member_lines[i+3], member_lines[i+4], member_lines[i+5]);
+
+        strcat(dst_json, each_member);
+    }
+
+    strcat(dst_json, "\n]");
+
+    return 1;
+}
+
+int get_member_admin(char *dst_json) {
+    if (REQ_DBG) printf("get_member_admin\n");
+    return get_member_template(dst_json, "1");
+}
+
+int get_member_doctor(char *dst_json) {
+    if (REQ_DBG) printf("get_member_doctor\n");
+    return get_member_template(dst_json, "2");
+}
+
+int get_member_patient(char *dst_json) {
+    if (REQ_DBG) printf("get_member_patient\n");
+    return get_member_template(dst_json, "3");
 }
 
 // int add_member(char *name, char *level, char *birthday, char *description, char *ret_id) {

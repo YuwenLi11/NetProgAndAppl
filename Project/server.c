@@ -10,7 +10,7 @@
 #include "request.h"
 
 #define BACKLOG 10 // queue length
-#define MAX_HEADER_SIZE 2048
+#define MAX_HEADER_SIZE 65536
 #define HTML_FOLDER "html"
 
 #define DBG 1
@@ -194,17 +194,33 @@ void get_response(char *res, char *client_header) {
                     if (strcmp(routes[3], "id") == 0) {
                         if (route_count == 5) { // id: fifth param
                             printf("[Action] /api/member/get/id : %s\n", routes[4]);
+                            char member_info[1024];
+                            int found = get_member_by_id(routes[4], member_info);
+                            if (found) sprintf(res, "HTTP/1.1 200 OK\r\n\r\n%s\r\n", member_info);
+                            else sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{}\r\n");
                         } else {
                             // no id or more param
                             strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
                         }
                     } else if (strcmp(routes[3], "all") == 0 && route_count == 4) {
                         printf("[Action] /api/member/get/all\n");
+                        char members_info[5120];
+                        get_member_all(members_info);
+                        sprintf(res, "HTTP/1.1 200 OK\r\n\r\n%s\r\n", members_info);
                     } else if (strcmp(routes[3], "admin") == 0 && route_count == 4) {
                         printf("[Action] /api/member/get/admin\n");
+                        char members_info[5120];
+                        get_member_admin(members_info);
+                        sprintf(res, "HTTP/1.1 200 OK\r\n\r\n%s\r\n", members_info);
                     } else if (strcmp(routes[3], "doctor") == 0 && route_count == 4) {
+                        char members_info[5120];
+                        get_member_doctor(members_info);
+                        sprintf(res, "HTTP/1.1 200 OK\r\n\r\n%s\r\n", members_info);
                         printf("[Action] /api/member/get/doctor\n");
                     } else if (strcmp(routes[3], "patient") == 0 && route_count == 4) {
+                        char members_info[5120];
+                        get_member_patient(members_info);
+                        sprintf(res, "HTTP/1.1 200 OK\r\n\r\n%s\r\n", members_info);
                         printf("[Action] /api/member/get/patient\n");
                     }
                 } else {
