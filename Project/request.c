@@ -58,7 +58,7 @@ void save_member_lines(char member_lines[][128], int member_line_count) {
 }
 
 int get_member_by_id(char *id, char *dst_json) {
-    char member_lines[1024][128];
+    char member_lines[256][128];
     int member_line_count = get_member_lines(member_lines);
 
     int i;
@@ -74,7 +74,7 @@ int get_member_by_id(char *id, char *dst_json) {
 }
 
 int get_member_all(char *dst_json) {
-    char member_lines[1024][128];
+    char member_lines[256][128];
     int member_line_count = get_member_lines(member_lines);
 
     if (member_line_count < 6) {
@@ -101,11 +101,11 @@ int get_member_all(char *dst_json) {
 }
 
 int get_member_template(char *dst_json, char *level) {
-    char member_lines_all[1024][128];
+    char member_lines_all[256][128];
     int member_line_count_all = get_member_lines(member_lines_all);
 
     // Keep level member only
-    char member_lines[1024][128];
+    char member_lines[256][128];
     int member_line_count = 0;
     int j;
     for (j = 0; j < member_line_count_all; j += 6) {
@@ -129,7 +129,7 @@ int get_member_template(char *dst_json, char *level) {
 
     int i;
     for (i = 6; i < member_line_count; i += 6) {
-        char each_member[1024];
+        char each_member[256];
         sprintf(each_member, ",\n  {\"id\": \"%s\", \"name\": \"%s\", \"level\": %s, \"birthday\": \"%s\", \"description\": \"%s\"}",
         member_lines[i], member_lines[i+2], member_lines[i+3], member_lines[i+4], member_lines[i+5]);
 
@@ -156,9 +156,82 @@ int get_member_patient(char *dst_json) {
     return get_member_template(dst_json, "3");
 }
 
-// int add_member(char *name, char *level, char *birthday, char *description, char *ret_id) {
-//
-// }
+int add_member(char *id, char *passwd, char *name, char *level, char *birthday, char *description) {
+    char member_lines[256][128];
+    int member_line_count = get_member_lines(member_lines);
+
+    // check user exist
+    int exist = 0;
+    int i;
+    for (i = 0; i < member_line_count; i += 6) {
+        if (strcmp(id, member_lines[i]) == 0) exist = 1;
+    }
+
+    if (!exist) {
+        strcpy(member_lines[member_line_count], id);
+        strcpy(member_lines[member_line_count + 1], passwd);
+        strcpy(member_lines[member_line_count + 2], name);
+        strcpy(member_lines[member_line_count + 3], level);
+        strcpy(member_lines[member_line_count + 4], birthday);
+        strcpy(member_lines[member_line_count + 5], description);
+
+        member_line_count += 6;
+        save_member_lines(member_lines, member_line_count);
+
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+int edit_member(char *id, char *passwd, char *name, char *level, char *birthday, char *description) {
+    char member_lines[256][128];
+    int member_line_count = get_member_lines(member_lines);
+
+    // check user exist
+    int i;
+    for (i = 0; i < member_line_count; i += 6) {
+        if (strcmp(id, member_lines[i]) == 0) { // user exist
+            if (id != NULL && strcmp(id, "") != 0) strcpy(member_lines[i], id);
+            if (id != NULL && strcmp(passwd, "") != 0) strcpy(member_lines[i + 1], passwd);
+            if (id != NULL && strcmp(name, "") != 0) strcpy(member_lines[i + 2], name);
+            if (id != NULL && strcmp(level, "") != 0) strcpy(member_lines[i + 3], level);
+            if (id != NULL && strcmp(birthday, "") != 0) strcpy(member_lines[i + 4], birthday);
+            if (id != NULL && strcmp(description, "") != 0) strcpy(member_lines[i + 5], description);
+
+            save_member_lines(member_lines, member_line_count);
+            return 1;
+        }
+    }
+
+    return 0; // not found
+}
+
+int delete_member(char *id) {
+  char member_lines[256][128];
+  int member_line_count = get_member_lines(member_lines);
+
+  // check user exist
+  int i;
+  for (i = 0; i < member_line_count; i += 6) {
+      if (strcmp(id, member_lines[i]) == 0) { // user exist
+          if (i + 6 < member_line_count) { // not the last 6 lines
+              // replace the last 6 lines to these 6 lines
+              strcpy(member_lines[i], member_lines[member_line_count - 6]);
+              strcpy(member_lines[i + 1], member_lines[member_line_count - 5]);
+              strcpy(member_lines[i + 2], member_lines[member_line_count - 4]);
+              strcpy(member_lines[i + 3], member_lines[member_line_count - 3]);
+              strcpy(member_lines[i + 4], member_lines[member_line_count - 2]);
+              strcpy(member_lines[i + 5], member_lines[member_line_count - 1]);
+          }
+
+          save_member_lines(member_lines, member_line_count - 6);
+          return 1;
+      }
+  }
+
+  return 0; // not found
+}
 
 int login(char *id, char *passwd, char *res) {
     // validation

@@ -259,27 +259,44 @@ void get_response(char *res, char *client_header) {
 
         if (strcmp(routes[0], "api") == 0) {
             if (strcmp(routes[1], "member") == 0) {
-                char id[16], name[32], level[4], birthday[16], description[256];
+                char id[16], passwd[16], name[32], level[4], birthday[16], description[256];
                 if (strcmp(routes[2], "add") == 0 && route_count == 3) {
-                    printf("[Action] /api/member/add\n");
+                    get_json_val_by_key(client_header, "id", id);
+                    printf("[Action] /api/member/add id:%s\n", id);
+                    get_json_val_by_key(client_header, "passwd", passwd);
                     get_json_val_by_key(client_header, "name", name);
                     get_json_val_by_key(client_header, "level", level);
                     get_json_val_by_key(client_header, "birthday", birthday);
                     get_json_val_by_key(client_header, "description", description);
-                    if (DBG) printf("DBG - member add name(%s) level(%s) birthday(%s) description(%s)\n", name, level, birthday, description);
-                    // TODO: DB
+                    if (DBG) printf("DBG - member add id(%s) passwd(%s) name(%s) level(%s) birthday(%s) description(%s)\n", id, passwd, name, level, birthday, description);
+
+                    // Fetch data
+                    int success = add_member(id, passwd, name, level, birthday, description);
+                    if (success) sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": true}\r\n");
+                    else sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": false}\r\n");
+
                 } else if (strcmp(routes[2], "edit") == 0 && route_count == 3) {
                     get_json_val_by_key(client_header, "id", id);
                     printf("[Action] /api/member/edit id:%s\n", id);
+                    get_json_val_by_key(client_header, "passwd", passwd);
                     get_json_val_by_key(client_header, "name", name);
+                    get_json_val_by_key(client_header, "level", level);
                     get_json_val_by_key(client_header, "birthday", birthday);
                     get_json_val_by_key(client_header, "description", description);
-                    if (DBG) printf("DBG - member edit id(%s) name(%s) birthday(%s) description(%s)\n", id, name, birthday, description);
-                    // TODO: DB
+                    if (DBG) printf("DBG - member edit id(%s) passwd(%s) name(%s) level(%s) birthday(%s) description(%s)\n", id, passwd, name, level, birthday, description);
+
+                    // Fetch data
+                    int success = edit_member(id, passwd, name, level, birthday, description);
+                    if (success) sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": true}\r\n");
+                    else sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": false}\r\n");
                 } else if (strcmp(routes[2], "delete") == 0 && route_count == 3) {
                     get_json_val_by_key(client_header, "id", id);
                     printf("[Action] /api/member/delete id:%s\n", id);
-                    // TODO: DB
+
+                    // Fetch data
+                    int success = delete_member(id);
+                    if (success) sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": true}\r\n");
+                    else sprintf(res, "HTTP/1.1 200 OK\r\n\r\n{\"success\": false}\r\n");
                 } else {
                     // /api/member/?
                     strcpy(res, "HTTP/1.1 404 Not Found\r\n\r\n");
